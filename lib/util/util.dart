@@ -1,10 +1,10 @@
 library util;
+
 import 'dart:async';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:hex/hex.dart';
 import 'package:pool/pool.dart';
 import 'package:spicecompanion/platform/platform.dart';
@@ -20,9 +20,9 @@ Future<String> downloadTextFromURL(String url) async {
       .getUrl(Uri.parse(url))
       .then((HttpClientRequest req) => req.close())
       .then((HttpClientResponse res) {
-        return res.transform(Utf8Decoder()).toList().then((data) {
-          return data.join("");
-        });
+    return res.transform(Utf8Decoder()).toList().then((data) {
+      return data.join("");
+    });
   });
 }
 

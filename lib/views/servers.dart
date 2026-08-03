@@ -9,12 +9,11 @@ class ServerInfo {
   String port = "1337";
   String pass = "";
 
-  ServerInfo({
-    @required this.name,
-    @required this.address,
-    @required this.port,
-    @required this.pass
-  });
+  ServerInfo(
+      {@required this.name,
+      @required this.address,
+      @required this.port,
+      @required this.pass});
 
   ServerInfo.fromJson(String json) {
     Map obj = jsonDecode(json);
@@ -44,12 +43,9 @@ class _ServerViewState extends State<ServerView> {
   @override
   void initState() {
     super.initState();
-    if (serverViewTimer != null)
-      serverViewTimer.cancel();
-    serverViewTimer = Timer.periodic(
-        Duration(milliseconds: 500),
-        serverViewTick
-    );
+    if (serverViewTimer != null) serverViewTimer.cancel();
+    serverViewTimer =
+        Timer.periodic(Duration(milliseconds: 500), serverViewTick);
 
     // reload server list
     preferencesGetStringList(cStoredServers).then((storedList) {
@@ -64,33 +60,28 @@ class _ServerViewState extends State<ServerView> {
           }
         }
         serverList = newList;
-        if (mounted)
-          setState(() {});
+        if (mounted) setState(() {});
       }
     });
   }
 
   @override
   void dispose() {
-    if (serverViewTimer != null)
-      serverViewTimer.cancel();
+    if (serverViewTimer != null) serverViewTimer.cancel();
     serverViewTimer = null;
     super.dispose();
   }
 
   void serverViewTick(Timer _) {
-
     // auto refresh state for connected/disconnected state
     try {
       setState(() {});
     } catch (Exception) {}
-
   }
 
   Future<void> saveServerList() {
-    return preferencesSetStringList(cStoredServers,
-        serverList.map((s) => s.toJson()).toList()
-    );
+    return preferencesSetStringList(
+        cStoredServers, serverList.map((s) => s.toJson()).toList());
   }
 
   @override
@@ -99,56 +90,52 @@ class _ServerViewState extends State<ServerView> {
     return Scaffold(
       // Build server list from `serverList`
       body: ListView(
-        children: serverList.map((ServerInfo s) {
-          var isCon = ConnectionPool.inst.isActive(s.address, s.port, s.pass);
-          var isConStr = isCon ? " (Active)" : "";
-          if (isCon && !hasConnection)
-            isConStr = " (Disconnected)";
-          return ListTile(
-            title: Text(
-                "${s.name}$isConStr",
-              style: !isCon ? null : TextStyle(
-                color: hasConnection ? Colors.lightGreen : Colors.orange
-              ),
-            ),
-            subtitle: Text('${s.address}:${s.port}'),
-            onTap: () {
+          children: serverList.map((ServerInfo s) {
+        var isCon = ConnectionPool.inst.isActive(s.address, s.port, s.pass);
+        var isConStr = isCon ? " (Active)" : "";
+        if (isCon && !hasConnection) isConStr = " (Disconnected)";
+        return ListTile(
+          title: Text(
+            "${s.name}$isConStr",
+            style: !isCon
+                ? null
+                : TextStyle(
+                    color: hasConnection ? Colors.lightGreen : Colors.orange),
+          ),
+          subtitle: Text('${s.address}:${s.port}'),
+          onTap: () {
+            // check for connect/disconnect
+            if (!isCon)
+              _tryConnect(s);
+            else {
+              // show disconnect info
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Disconnected."),
+                backgroundColor: Colors.orange,
+                duration: Duration(milliseconds: 500),
+              ));
 
-              // check for connect/disconnect
-              if (!isCon) _tryConnect(s);
-              else {
-
-                // show disconnect info
-                Scaffold.of(context).showSnackBar(SnackBar(
-                  content: Text("Disconnected."),
-                  backgroundColor: Colors.orange,
-                  duration: Duration(milliseconds: 500),
-                ));
-
-                ConnectionPool.inst.disconnect();
-                setState(() {});
-              }
-            },
-            onLongPress: () => _showOptions(s),
-          );
-        }).toList()
-      ),
+              ConnectionPool.inst.disconnect();
+              setState(() {});
+            }
+          },
+          onLongPress: () => _showOptions(s),
+        );
+      }).toList()),
 
       // 'Add Server' Button
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return ServerEditView(
-                  onSave: (ServerInfo server) {
-                    setState(() => serverList.add(server));
-                    saveServerList();
-                  },
-                );
-              }
-            ),
+            MaterialPageRoute(builder: (BuildContext context) {
+              return ServerEditView(
+                onSave: (ServerInfo server) {
+                  setState(() => serverList.add(server));
+                  saveServerList();
+                },
+              );
+            }),
           );
         },
       ),
@@ -158,28 +145,22 @@ class _ServerViewState extends State<ServerView> {
   bool connecting = false;
 
   void _tryConnect(ServerInfo server) {
-
     // abort if already trying to connect
-    if (connecting)
-      return;
+    if (connecting) return;
 
     // change server details
-    ConnectionPool.inst.changeServer(
-      server.address,
-      int.parse(server.port),
-      server.pass
-    );
+    ConnectionPool.inst
+        .changeServer(server.address, int.parse(server.port), server.pass);
 
     // attempt to get a connection
     connecting = true;
     Connection connection;
     ConnectionPool.inst.get().then((con) {
-
       // accept connection
       connection = con;
 
       // show info
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Connected to ${server.address}:${server.port}"),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 1),
@@ -187,8 +168,7 @@ class _ServerViewState extends State<ServerView> {
 
       // query avs info to test
       return infoAVS(con);
-    },
-    onError: (err) {
+    }, onError: (err) {
       ConnectionPool.inst.disconnect();
 
       // show error
@@ -197,24 +177,20 @@ class _ServerViewState extends State<ServerView> {
         text = "Failed to connect: Wrong password?";
       else
         text = "Failed to connect to ${server.address}:${server.port}";
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(text),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 1),
       ));
-
     }).then((avs) {
-      if (connection != null)
-        connection.free();
+      if (connection != null) connection.free();
     }, onError: (err) {
       ConnectionPool.inst.disconnect();
     }).whenComplete(() {
       connecting = false;
 
       // update state since the active server changed
-      if (mounted)
-        setState(() {});
-
+      if (mounted) setState(() {});
     });
   }
 
@@ -224,35 +200,34 @@ class _ServerViewState extends State<ServerView> {
       builder: (BuildContext context) => SimpleDialog(
         children: <Widget>[
           SimpleDialogOption(
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.edit),
-                Container(
-                  margin: EdgeInsets.only(left: 5),
-                  child: Text('Edit \'${server.name}\''),
-                ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) => ServerEditView(
-                    baseDetails: server,
-                    onSave: (ServerInfo newServer) {
-                      setState(() {
-                        server.name = newServer.name;
-                        server.address = newServer.address;
-                        server.port = newServer.port;
-                        server.pass = newServer.pass;
-                      });
-                      saveServerList();
-                    },
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.edit),
+                  Container(
+                    margin: EdgeInsets.only(left: 5),
+                    child: Text('Edit \'${server.name}\''),
                   ),
-                ),
-              );
-            }
-          ),
+                ],
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => ServerEditView(
+                      baseDetails: server,
+                      onSave: (ServerInfo newServer) {
+                        setState(() {
+                          server.name = newServer.name;
+                          server.address = newServer.address;
+                          server.port = newServer.port;
+                          server.pass = newServer.pass;
+                        });
+                        saveServerList();
+                      },
+                    ),
+                  ),
+                );
+              }),
           SimpleDialogOption(
             child: Row(
               children: <Widget>[
@@ -297,11 +272,10 @@ class _ServerEditViewState extends State<ServerEditView> {
       _data = ServerInfo(name: '', address: '', port: '', pass: '');
     } else {
       _data = ServerInfo(
-        name: widget.baseDetails.name,
-        address: widget.baseDetails.address,
-        port: widget.baseDetails.port,
-        pass: widget.baseDetails.pass
-      );
+          name: widget.baseDetails.name,
+          address: widget.baseDetails.address,
+          port: widget.baseDetails.port,
+          pass: widget.baseDetails.pass);
     }
   }
 
@@ -388,14 +362,14 @@ class _ServerEditViewState extends State<ServerEditView> {
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text('Cancel'),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          FlatButton(
+          TextButton(
             child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
             onPressed: () {
-              if(_formState.currentState.validate()) {
+              if (_formState.currentState.validate()) {
                 _formState.currentState.save();
                 widget.onSave(_data);
                 Navigator.of(context).pop();

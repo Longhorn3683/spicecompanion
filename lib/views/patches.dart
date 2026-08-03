@@ -7,65 +7,51 @@ class PatchCache {
 }
 
 class PatchesView extends StatefulWidget {
-
   @override
   _PatchesViewState createState() => _PatchesViewState();
 }
 
 class _PatchesViewState extends State<PatchesView> {
-
   var subViews = [
     PatchesSubView(setting: _PatchesSubViewSetting.Preset),
     PatchesSubView(setting: _PatchesSubViewSetting.Online),
     PatchesSubView(setting: _PatchesSubViewSetting.Custom),
   ];
 
-  var titles = [
-    "Preset",
-    "Online",
-    "Custom"
-  ];
+  var titles = ["Preset", "Online", "Custom"];
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: subViews.length,
-      child: Scaffold(
-        appBar: TabBar(
-          isScrollable: true,
-          tabs: subViews.map((PatchesSubView subView) {
-            return Tab(
-              text: titles[subView.setting.index],
-            );
-          }).toList(),
-        ),
-        body: TabBarView(
-          children: subViews,
-        ),
-      )
-    );
+        length: subViews.length,
+        child: Scaffold(
+          appBar: TabBar(
+            isScrollable: true,
+            tabs: subViews.map((PatchesSubView subView) {
+              return Tab(
+                text: titles[subView.setting.index],
+              );
+            }).toList(),
+          ),
+          body: TabBarView(
+            children: subViews,
+          ),
+        ));
   }
 }
 
 class PatchesSubView extends StatefulWidget {
-
   final _PatchesSubViewSetting setting;
   PatchesSubView({this.setting});
 
   @override
-  _PatchesSubViewState createState() => _PatchesSubViewState(
-      setting: this.setting
-  );
+  _PatchesSubViewState createState() =>
+      _PatchesSubViewState(setting: this.setting);
 }
 
-enum _PatchesSubViewSetting {
-  Preset,
-  Online,
-  Custom
-}
+enum _PatchesSubViewSetting { Preset, Online, Custom }
 
 class _PatchesSubViewState extends State<PatchesSubView> {
-
   // keys
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
@@ -79,7 +65,6 @@ class _PatchesSubViewState extends State<PatchesSubView> {
   Future<void> update() async {
     return ConnectionPool.inst.get().then((con) {
       infoAVS(con).then((avs) async {
-
         // get info
         var gameCode = avs["model"];
         var dateCode = int.parse(avs["ext"]);
@@ -89,35 +74,27 @@ class _PatchesSubViewState extends State<PatchesSubView> {
         switch (this.setting) {
           case _PatchesSubViewSetting.Preset:
             for (var patch in PatchManager.inst.getPatches(gameCode, dateCode))
-              if (patch.preset)
-                patches.add(patch);
+              if (patch.preset) patches.add(patch);
             break;
           case _PatchesSubViewSetting.Online:
             for (var patch in PatchManager.inst.getPatches(gameCode, dateCode))
-              if (patch.online)
-                patches.add(patch);
+              if (patch.online) patches.add(patch);
             break;
           case _PatchesSubViewSetting.Custom:
             for (var patch in PatchManager.inst.getPatches(gameCode, dateCode))
-              if (!patch.preset)
-                patches.add(patch);
+              if (!patch.preset) patches.add(patch);
             break;
         }
 
         // add patches to cache
         List<PatchCache> newList = List();
         for (var patch in patches) {
-          newList.add(PatchCache(
-              patch,
-              await patch.getState(con)
-          ));
+          newList.add(PatchCache(patch, await patch.getState(con)));
         }
         this.patchList = newList;
 
         // update state
-        if (mounted)
-          setState(() {});
-
+        if (mounted) setState(() {});
       }).whenComplete(() => con.free());
     }, onError: (e) {
       this.patchList = List();
@@ -132,7 +109,6 @@ class _PatchesSubViewState extends State<PatchesSubView> {
 
   @override
   Widget build(BuildContext context) {
-
     // action button
     FloatingActionButton actionButton;
     switch (this.setting) {
@@ -188,114 +164,110 @@ class _PatchesSubViewState extends State<PatchesSubView> {
         onRefresh: update,
         child: ListView(
             children: patchList.map((PatchCache cache) {
+          // decide on title and color
+          String title;
+          Color color;
+          switch (cache.state) {
+            case PatchState.Unknown:
+              title = cache.patch.name;
+              color = Colors.grey;
+              break;
+            case PatchState.Enabled:
+              title = "${cache.patch.name} (Enabled)";
+              color = Colors.green;
+              break;
+            case PatchState.Disabled:
+              title = "${cache.patch.name} (Disabled)";
+              color = Colors.red;
+              break;
+          }
 
-              // decide on title and color
-              String title;
-              Color color;
+          // build item
+          return ListTile(
+            title: Text(
+              title,
+              style: TextStyle(
+                color: color,
+              ),
+            ),
+            subtitle: Text(cache.patch.description),
+            onLongPress: () {
+              switch (this.setting) {
+                case _PatchesSubViewSetting.Preset:
+                  break;
+                case _PatchesSubViewSetting.Online:
+                  break;
+                case _PatchesSubViewSetting.Custom:
+                  _showCustomOptions(cache.patch);
+                  break;
+              }
+            },
+            onTap: () {
+              // decide on new state
+              var newState = PatchState.Unknown;
               switch (cache.state) {
                 case PatchState.Unknown:
-                  title = cache.patch.name;
-                  color = Colors.grey;
-                  break;
-                case PatchState.Enabled:
-                  title = "${cache.patch.name} (Enabled)";
-                  color = Colors.green;
+                  newState = PatchState.Unknown;
                   break;
                 case PatchState.Disabled:
-                  title = "${cache.patch.name} (Disabled)";
-                  color = Colors.red;
+                  newState = PatchState.Enabled;
+                  break;
+                case PatchState.Enabled:
+                  newState = PatchState.Disabled;
                   break;
               }
 
-              // build item
-              return ListTile(
-                title: Text(title, style: TextStyle(
-                  color: color,
-                ),
-                ),
-                subtitle: Text(cache.patch.description),
-                onLongPress: () {
-                  switch (this.setting) {
-                    case _PatchesSubViewSetting.Preset:
-                      break;
-                    case _PatchesSubViewSetting.Online:
-                      break;
-                    case _PatchesSubViewSetting.Custom:
-                      _showCustomOptions(cache.patch);
-                      break;
-                  }
-                },
-                onTap: () {
+              // check if no state change takes place
+              if (newState == PatchState.Unknown) {
+                var error = "Patch is invalid: memory mismatch.";
+                if (!ConnectionPool.inst.hasPassword())
+                  error = "Patches require a password to be set.";
 
-                  // decide on new state
-                  var newState = PatchState.Unknown;
-                  switch (cache.state) {
-                    case PatchState.Unknown:
-                      newState = PatchState.Unknown;
-                      break;
-                    case PatchState.Disabled:
-                      newState = PatchState.Enabled;
-                      break;
-                    case PatchState.Enabled:
-                      newState = PatchState.Disabled;
-                      break;
-                  }
+                // show error
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(error),
+                  backgroundColor: Colors.red,
+                  duration: Duration(milliseconds: 700),
+                ));
+                return;
+              }
 
-                  // check if no state change takes place
-                  if (newState == PatchState.Unknown) {
-                    var error = "Patch is invalid: memory mismatch.";
-                    if (!ConnectionPool.inst.hasPassword())
-                      error = "Patches require a password to be set.";
-
-                    // show error
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text(error),
-                      backgroundColor: Colors.red,
-                      duration: Duration(milliseconds: 700),
-                    ));
-                    return;
-                  }
-
-                  // get connection
-                  ConnectionPool.inst.get().then((con) async {
-
-                    // apply new state
-                    bool error = false;
-                    try {
-                      bool result = await cache.patch.setState(
-                          con, newState).whenComplete(() {
-                        con.free();
-                        update();
-                      });
-                      if (result == null || !result)
-                        error = true;
-                    } catch (Exception) {
-                      con.free();
-                      error = true;
-                    }
-
-                    // show error
-                    if (error) {
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        content: Text("Error applying patch."),
-                        backgroundColor: Colors.red,
-                        duration: Duration(milliseconds: 700),
-                      ));
-                    }
-
-                  }, onError: (e) {
-
-                    // show error
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text("Please connect to a server."),
-                      backgroundColor: Colors.red,
-                      duration: Duration(milliseconds: 700),
-                    ));
+              // get connection
+              ConnectionPool.inst.get().then((con) async {
+                // apply new state
+                bool error = false;
+                try {
+                  bool result = await cache.patch
+                      .setState(con, newState)
+                      .whenComplete(() {
+                    con.free();
+                    update();
                   });
-                },
-              );
-            }).toList()
-        ),
+                  if (result == null || !result) error = true;
+                } catch (Exception) {
+                  con.free();
+                  error = true;
+                }
+
+                // show error
+                if (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("Error applying patch."),
+                    backgroundColor: Colors.red,
+                    duration: Duration(milliseconds: 700),
+                  ));
+                }
+              }, onError: (e) {
+                // show error
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Please connect to a server."),
+                  backgroundColor: Colors.red,
+                  duration: Duration(milliseconds: 700),
+                ));
+              });
+            },
+          );
+        }).toList()),
       ),
     );
   }
@@ -317,13 +289,14 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => PatchDownloadView(),
-                  ),
-                ).then((_) => update());
-              }
-          ),
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => PatchDownloadView(),
+                      ),
+                    )
+                    .then((_) => update());
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -337,10 +310,8 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               onPressed: () {
                 Navigator.of(context).pop();
                 String json = PatchManager.inst.getPatchesJSONOnline();
-                if (Platform.isAndroid || Platform.isIOS)
-                  Share.share(json);
-              }
-          ),
+                if (Platform.isAndroid || Platform.isIOS) Share.share(json);
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -353,8 +324,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-              }
-          ),
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -369,8 +339,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
                 Navigator.of(context).pop();
                 PatchManager.inst.removeOnlinePatches();
                 update();
-              }
-          ),
+              }),
         ],
       ),
     );
@@ -393,19 +362,20 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => PatchAddCustomView(
-                      baseDetails: null,
-                      onSave: (patch) {
-                        PatchManager.inst.addPatch(patch);
-                        update();
-                      },
-                    ),
-                  ),
-                ).then((_) => update());
-              }
-          ),
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => PatchAddCustomView(
+                          baseDetails: null,
+                          onSave: (patch) {
+                            PatchManager.inst.addPatch(patch);
+                            update();
+                          },
+                        ),
+                      ),
+                    )
+                    .then((_) => update());
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -419,10 +389,8 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               onPressed: () {
                 Navigator.of(context).pop();
                 String json = PatchManager.inst.getPatchesJSONCustom();
-                if (Platform.isAndroid || Platform.isIOS)
-                  Share.share(json);
-              }
-          ),
+                if (Platform.isAndroid || Platform.isIOS) Share.share(json);
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -435,8 +403,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-              }
-          ),
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -451,8 +418,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
                 PatchManager.inst.removeCustomPatches();
                 update();
                 Navigator.of(context).pop();
-              }
-          ),
+              }),
         ],
       ),
     );
@@ -487,8 +453,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
                     ),
                   ),
                 );
-              }
-          ),
+              }),
           SimpleDialogOption(
             child: Row(
               children: <Widget>[
@@ -512,7 +477,6 @@ class _PatchesSubViewState extends State<PatchesSubView> {
 }
 
 class PatchDownloadView extends StatefulWidget {
-
   @override
   _PatchDownloadViewState createState() => _PatchDownloadViewState();
 }
@@ -560,20 +524,19 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text("Cancel"),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          FlatButton(
+          TextButton(
             child: Text("Download/Import"),
             onPressed: () async {
-              if(_formState.currentState.validate()) {
+              if (_formState.currentState.validate()) {
                 _formState.currentState.save();
 
                 // download
                 await downloadTextFromURL(_urlInput).then((json) async {
                   try {
-
                     // parse patches
                     int no1 = PatchManager.inst.countPatches();
                     PatchManager.inst.addPatchesFromJson(json, online: true);
@@ -588,35 +551,33 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
                             title: Text("Success"),
                             content: Text("$count patches have been imported!"),
                             actions: [
-                              FlatButton(child: Text("Dismiss"), onPressed: () {
-                                Navigator.of(context).pop();
-                              })
+                              TextButton(
+                                  child: Text("Dismiss"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  })
                             ],
                           );
-                        }
-                    );
-
+                        });
                   } on Exception {
-
                     // show error
                     await showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Error"),
-                          content: Text("Unable to parse from JSON :("),
-                          actions: [
-                            FlatButton(child: Text("Dismiss"), onPressed: () {
-                              Navigator.of(context).pop();
-                            })
-                          ],
-                        );
-                      }
-                    );
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Error"),
+                            content: Text("Unable to parse from JSON :("),
+                            actions: [
+                              TextButton(
+                                  child: Text("Dismiss"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  })
+                            ],
+                          );
+                        });
                   }
-
                 }, onError: (e) async {
-
                   // show error
                   await showDialog(
                       context: context,
@@ -625,17 +586,17 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
                           title: Text("Error"),
                           content: Text("Unable to download contents :("),
                           actions: [
-                            FlatButton(child: Text("Dismiss"), onPressed: () {
-                              Navigator.of(context).pop();
-                            })
+                            TextButton(
+                                child: Text("Dismiss"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                })
                           ],
                         );
-                      }
-                  );
+                      });
                 });
 
                 Navigator.of(context).pop();
-
               } else {
                 setState(() {
                   // upon trying to add/write invalid data,
@@ -652,14 +613,13 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
   }
 
   String validateURL(String cardID) {
-    if (!RegExp(r"^(https?:\/\/)?(www\.)?"
-        + r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\."
-        + r"[a-z]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$").hasMatch(cardID))
-      return "Invalid URL!";
+    if (!RegExp(r"^(https?:\/\/)?(www\.)?" +
+            r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\." +
+            r"[a-z]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$")
+        .hasMatch(cardID)) return "Invalid URL!";
     return null;
   }
 }
-
 
 class PatchAddCustomView extends StatefulWidget {
   PatchAddCustomView({@required this.onSave, this.baseDetails});
@@ -679,7 +639,6 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
   void initState() {
     super.initState();
     if (widget.baseDetails == null) {
-
       // create new patch
       _data = MemoryPatch.fromMap({
         "name": "",
@@ -695,7 +654,6 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
       if (gameModel.length == 3) {
         _data.gameCode = gameModel;
       }
-
     } else {
       var map = {};
       widget.baseDetails.writeToMap(map);
@@ -760,7 +718,8 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
                 leading: Icon(Icons.calendar_today),
                 title: TextFormField(
                   autocorrect: false,
-                  initialValue: _data.dateCodeMax == 0 ? null
+                  initialValue: _data.dateCodeMax == 0
+                      ? null
                       : _data.dateCodeMax.toString(),
                   decoration: InputDecoration(
                     labelText: 'Date Code',
@@ -799,8 +758,8 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
                     hintText: '9090909090',
                   ),
                   onSaved: (s) {
-                    _data.getPatches()[0].dataEnabled = s.replaceAll(
-                        new RegExp(r"\s+\b|\b\s"), "");
+                    _data.getPatches()[0].dataEnabled =
+                        s.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
                   },
                   validator: validateHex,
                   autovalidateMode: _autoValidateFields,
@@ -816,8 +775,8 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
                     hintText: 'E900000000',
                   ),
                   onSaved: (s) {
-                    _data.getPatches()[0].dataDisabled = s.replaceAll(
-                        new RegExp(r"\s+\b|\b\s"), "");
+                    _data.getPatches()[0].dataDisabled =
+                        s.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
                   },
                   validator: validateHex,
                   autovalidateMode: _autoValidateFields,
@@ -827,8 +786,9 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
                 leading: Icon(Icons.code),
                 title: TextFormField(
                   autocorrect: false,
-                  initialValue: _data.getPatches()[0].dataOffset == 0 ? null :
-                    _data.getPatches()[0].dataOffset.toString(),
+                  initialValue: _data.getPatches()[0].dataOffset == 0
+                      ? null
+                      : _data.getPatches()[0].dataOffset.toString(),
                   decoration: InputDecoration(
                     labelText: 'Offset',
                     hintText: '0xFFFF / 65535',
@@ -848,14 +808,14 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text('Cancel'),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          FlatButton(
+          TextButton(
             child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
             onPressed: () {
-              if(_formState.currentState.validate()) {
+              if (_formState.currentState.validate()) {
                 _formState.currentState.save();
                 widget.onSave(_data);
                 Navigator.of(context).pop();

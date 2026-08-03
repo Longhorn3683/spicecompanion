@@ -8,7 +8,6 @@ class TouchControl {
   int curTouchID = 100000;
 
   TouchControl() {
-
     // assign random touch ID and hope stuff doesn't interfere
     var rng = new Random();
     curTouchID = 100000 + rng.nextInt(99999);
@@ -36,8 +35,7 @@ class TouchControl {
       writeCounter++;
       return touchWrite(con, updatedTouches).then((e) {
         return touchWriteReset(con, inactiveTouches).then((e) {
-          if (!flushed)
-            _flushState();
+          if (!flushed) _flushState();
         });
       }).whenComplete(() {
         con.free();
@@ -96,8 +94,7 @@ class TouchControl {
   Future<void> vibrate() async {
     var vibrationMs = Settings.buttonVibrationDuration.toInt();
     if (vibrationMs > 1) {
-      Vibration.vibrate(
-          duration: vibrationMs);
+      //Vibration.vibrate(duration: vibrationMs);
     }
   }
 }

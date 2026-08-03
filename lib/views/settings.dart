@@ -7,9 +7,9 @@ class Settings {
   static get darkMode {
     return _darkMode;
   }
+
   static set darkMode(bool value) {
-    if (_darkMode == value)
-      return;
+    if (_darkMode == value) return;
     switch (value) {
       case false:
         currentTheme = SpiceTheme.Light;
@@ -21,13 +21,13 @@ class Settings {
     _darkMode = value;
     save();
   }
+
   static double buttonVibrationDuration = 0;
   static double screenQuality = 40;
   static double screenThreads = 2;
   static double screenDivide = 2;
 
   static Future<void> save() {
-
     // build json
     var map = {};
     map["darkMode"] = darkMode;
@@ -42,7 +42,6 @@ class Settings {
   }
 
   static Future<void> load() async {
-
     // load defaults first
     defaults();
 
@@ -50,19 +49,14 @@ class Settings {
     try {
       var json = await preferencesGetString(preferencesKey);
       if (json != null && json.length > 0) {
-
         // decode json
         var map = jsonDecode(json);
-        darkMode =
-            map["darkMode"] ?? darkMode;
+        darkMode = map["darkMode"] ?? darkMode;
         buttonVibrationDuration =
             map["buttonVibrationDuration"] ?? buttonVibrationDuration;
-        screenQuality =
-            map["screenQuality"] ?? screenQuality;
-        screenThreads =
-            map["screenThreads"] ?? screenThreads;
-        screenDivide =
-            map["screenDivide"] ?? screenDivide;
+        screenQuality = map["screenQuality"] ?? screenQuality;
+        screenThreads = map["screenThreads"] ?? screenThreads;
+        screenDivide = map["screenDivide"] ?? screenDivide;
       }
     } catch (e) {
       preferencesSetString(preferencesKey, "");
@@ -76,13 +70,11 @@ class Settings {
 }
 
 class SettingsView extends StatefulWidget {
-
   @override
   _SettingsViewState createState() => _SettingsViewState();
 }
 
 class _SettingsViewState extends State<SettingsView> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,8 +89,9 @@ class _SettingsViewState extends State<SettingsView> {
             },
           ),
           ListTile(
-            title: Text("Button Vibration Duration: "
-              + Settings.buttonVibrationDuration.toInt().toString() + "ms"),
+            title: Text("Button Vibration Duration: " +
+                Settings.buttonVibrationDuration.toInt().toString() +
+                "ms"),
             subtitle: Slider(
               value: Settings.buttonVibrationDuration,
               min: 0,
@@ -106,14 +99,15 @@ class _SettingsViewState extends State<SettingsView> {
               onChanged: (value) {
                 Settings.buttonVibrationDuration = value;
                 Settings.save();
-                Vibration.vibrate(duration: Settings.buttonVibrationDuration.toInt());
+                //Vibration.vibrate(duration: Settings.buttonVibrationDuration.toInt());
                 setState(() {});
               },
             ),
           ),
           ListTile(
-            title: Text("Screen Quality: "
-                + Settings.screenQuality.toInt().toString() + "%"),
+            title: Text("Screen Quality: " +
+                Settings.screenQuality.toInt().toString() +
+                "%"),
             subtitle: Slider(
               value: Settings.screenQuality,
               min: 0,
@@ -126,8 +120,8 @@ class _SettingsViewState extends State<SettingsView> {
             ),
           ),
           ListTile(
-            title: Text("Screen Threads: "
-                + Settings.screenThreads.toInt().toString()),
+            title: Text(
+                "Screen Threads: " + Settings.screenThreads.toInt().toString()),
             subtitle: Slider(
               value: Settings.screenThreads,
               min: 1,
@@ -140,8 +134,8 @@ class _SettingsViewState extends State<SettingsView> {
             ),
           ),
           ListTile(
-            title: Text("Screen Divide: "
-                + Settings.screenDivide.toInt().toString()),
+            title: Text(
+                "Screen Divide: " + Settings.screenDivide.toInt().toString()),
             subtitle: Slider(
               value: Settings.screenDivide,
               min: 1,
@@ -157,8 +151,9 @@ class _SettingsViewState extends State<SettingsView> {
             title: Text("Restart Game"),
             onTap: () {
               ConnectionPool.inst.get().then((con) {
-                controlRestart(con).catchError((e) {
-                }).whenComplete(() => con.free());
+                controlRestart(con)
+                    .catchError((e) {})
+                    .whenComplete(() => con.free());
               }, onError: (e) {});
             },
           ),
@@ -166,8 +161,9 @@ class _SettingsViewState extends State<SettingsView> {
             title: Text("Kill Game"),
             onTap: () {
               ConnectionPool.inst.get().then((con) {
-                controlExit(con, 0).catchError((e) {
-                }).whenComplete(() => con.free());
+                controlExit(con, 0)
+                    .catchError((e) {})
+                    .whenComplete(() => con.free());
               }, onError: (e) {});
             },
           ),
@@ -175,8 +171,9 @@ class _SettingsViewState extends State<SettingsView> {
             title: Text("Force Shutdown"),
             onTap: () {
               ConnectionPool.inst.get().then((con) {
-                controlShutdown(con).catchError((e) {
-                }).whenComplete(() => con.free());
+                controlShutdown(con)
+                    .catchError((e) {})
+                    .whenComplete(() => con.free());
               }, onError: (e) {});
             },
           ),
@@ -184,8 +181,9 @@ class _SettingsViewState extends State<SettingsView> {
             title: Text("Force Reboot"),
             onTap: () {
               ConnectionPool.inst.get().then((con) {
-                controlReboot(con).catchError((e) {
-                }).whenComplete(() => con.free());
+                controlReboot(con)
+                    .catchError((e) {})
+                    .whenComplete(() => con.free());
               }, onError: (e) {});
             },
           ),
@@ -199,9 +197,7 @@ class _SettingsViewState extends State<SettingsView> {
             title: Text("About"),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (context) => AboutView()
-                ),
+                MaterialPageRoute(builder: (context) => AboutView()),
               );
             },
           ),
@@ -212,13 +208,11 @@ class _SettingsViewState extends State<SettingsView> {
 }
 
 class AboutView extends StatefulWidget {
-
   @override
   _AboutViewState createState() => _AboutViewState();
 }
 
 class _AboutViewState extends State<AboutView> {
-
   String content = "";
 
   @override
@@ -239,13 +233,14 @@ class _AboutViewState extends State<AboutView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("About")
-      ),
+      appBar: AppBar(title: Text("About")),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: SingleChildScrollView(
-          child: Text(content, style: TextStyle(fontSize: 23),),
+          child: Text(
+            content,
+            style: TextStyle(fontSize: 23),
+          ),
         ),
       ),
     );

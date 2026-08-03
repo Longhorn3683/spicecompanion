@@ -14,7 +14,6 @@ class TagManager {
   }
 
   Future<void> start() async {
-
     // don't subscribe if on unsupported platform
     if (!Platform.isAndroid && !Platform.isIOS) {
       print("NFC features unsupported.");
@@ -22,7 +21,7 @@ class TagManager {
     }
 
     // subscribe
-    FlutterNfcReader.read.listen((data) async {
+    /*FlutterNfcReader.read.listen((data) async {
 
       // get data
       String idData = data.id;
@@ -60,6 +59,6 @@ class TagManager {
       }
     }, onError: (e) {
       print("NFC features unavailable.");
-    });
+    });*/
   }
 }

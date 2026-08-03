@@ -6,9 +6,8 @@ bool cardListLoaded = false;
 
 Future<void> cardListSave() {
   if (cardList == null) return null;
-  return preferencesSetStringList(cCards,
-      cardList.map((card) => card.toJson()).toList()
-  );
+  return preferencesSetStringList(
+      cCards, cardList.map((card) => card.toJson()).toList());
 }
 
 Future<void> cardListLoad() async {
@@ -74,53 +73,45 @@ class _CardManagerViewState extends State<CardManagerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       // build card list from `cardList`
       body: ListView(
-        children: cardList.map((CardInfo card) {
-          return ListTile(
-            title: Text(
-              card.name + (card.active ? " (Active)" : ""),
-              style: TextStyle(color: card.active ? Colors.green : null),
-            ),
-            subtitle: Text(card.id),
-            onTap: () {
-
-              // ask which player if multiple readers are present
-              if (getPlayerCount(gameModel) <= 1) {
-
-                // check if enough time has passed since last insert
-                var now = DateTime.now();
-                if (now.difference(insertLast) > insertGap) {
-                  insertLast = now;
-                  _insertCard(0, card.id);
-                }
-
-              } else {
-                _showInsert(card);
+          children: cardList.map((CardInfo card) {
+        return ListTile(
+          title: Text(
+            card.name + (card.active ? " (Active)" : ""),
+            style: TextStyle(color: card.active ? Colors.green : null),
+          ),
+          subtitle: Text(card.id),
+          onTap: () {
+            // ask which player if multiple readers are present
+            if (getPlayerCount(gameModel) <= 1) {
+              // check if enough time has passed since last insert
+              var now = DateTime.now();
+              if (now.difference(insertLast) > insertGap) {
+                insertLast = now;
+                _insertCard(0, card.id);
               }
-
-            },
-            onLongPress: () => _showOptions(card),
-          );
-        }).toList()
-      ),
+            } else {
+              _showInsert(card);
+            }
+          },
+          onLongPress: () => _showOptions(card),
+        );
+      }).toList()),
 
       // 'Add Card' Button
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return CardEditView(
-                    onSave: (CardInfo card) {
-                      setState(() => cardList.add(card));
-                      cardListSave();
-                    },
-                  );
-                }
-            ),
+            MaterialPageRoute(builder: (BuildContext context) {
+              return CardEditView(
+                onSave: (CardInfo card) {
+                  setState(() => cardList.add(card));
+                  cardListSave();
+                },
+              );
+            }),
           );
         },
       ),
@@ -159,32 +150,28 @@ class _CardManagerViewState extends State<CardManagerView> {
                     ),
                   ),
                 );
-              }
-          ),
+              }),
           SimpleDialogOption(
             child: Row(
               children: <Widget>[
                 Icon(card.active
                     ? Icons.indeterminate_check_box
-                    : Icons.check_box
-                ),
+                    : Icons.check_box),
                 Container(
-                  margin: EdgeInsets.only(left: 5),
-                  child: Text(card.active
-                      ? "Remove active status"
-                      : "Set to active card"
-                  )
-                ),
+                    margin: EdgeInsets.only(left: 5),
+                    child: Text(card.active
+                        ? "Remove active status"
+                        : "Set to active card")),
               ],
             ),
             onPressed: () {
               Navigator.of(context).pop();
               setState(() {
                 if (!card.active) {
-                  for (var i in cardList)
-                    i.active = false;
+                  for (var i in cardList) i.active = false;
                   card.active = true;
-                } else card.active = false;
+                } else
+                  card.active = false;
               });
               cardListSave();
             },
@@ -228,8 +215,7 @@ class _CardManagerViewState extends State<CardManagerView> {
               onPressed: () {
                 Navigator.of(context).pop();
                 _insertCard(0, card.id);
-              }
-          ),
+              }),
           SimpleDialogOption(
               child: Row(
                 children: <Widget>[
@@ -243,8 +229,7 @@ class _CardManagerViewState extends State<CardManagerView> {
               onPressed: () {
                 Navigator.of(context).pop();
                 _insertCard(1, card.id);
-              }
-          ),
+              }),
         ],
       ),
     );
@@ -252,9 +237,8 @@ class _CardManagerViewState extends State<CardManagerView> {
 
   void _insertCard(int unit, String cardID) {
     ConnectionPool.inst.get().then((con) {
-
       // show info
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Inserting Card: $cardID"),
         backgroundColor: Colors.deepOrange,
         duration: insertGap,
@@ -264,11 +248,9 @@ class _CardManagerViewState extends State<CardManagerView> {
       cardInsert(con, unit, cardID).whenComplete(() {
         con.free();
       });
-
     }, onError: (err) {
-
       // show error
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Please connect to a server first."),
         backgroundColor: Colors.deepOrange,
         duration: insertGap,
@@ -278,7 +260,6 @@ class _CardManagerViewState extends State<CardManagerView> {
 }
 
 class CardEditView extends StatefulWidget {
-
   final void Function(CardInfo) onSave;
 
   // If none provided, the UI will say 'Add' not 'Edit'/'Save'
@@ -313,8 +294,7 @@ class _CardEditViewState extends State<CardEditView> {
         if (validatePublicID(text) == null) {
           var cardID = CardCipher.decode(text);
           var cardText = cardIDController.text;
-          if (cardText != cardID)
-            cardIDController.text = cardID;
+          if (cardText != cardID) cardIDController.text = cardID;
         }
       }
     });
@@ -342,8 +322,7 @@ class _CardEditViewState extends State<CardEditView> {
 
   @override
   void dispose() {
-    if (this.cardSubscription != null)
-      this.cardSubscription.cancel();
+    if (this.cardSubscription != null) this.cardSubscription.cancel();
     super.dispose();
   }
 
@@ -393,9 +372,7 @@ class _CardEditViewState extends State<CardEditView> {
                   controller: pubIDController,
                   autocorrect: false,
                   decoration: InputDecoration(
-                    labelText: "Public ID",
-                    hintText: "optional"
-                  ),
+                      labelText: "Public ID", hintText: "optional"),
                   keyboardType: TextInputType.text,
                   validator: validatePublicID,
                   autovalidateMode: _autoValidateFields,
@@ -425,14 +402,14 @@ class _CardEditViewState extends State<CardEditView> {
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text('Cancel'),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          FlatButton(
+          TextButton(
             child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
             onPressed: () {
-              if(_formState.currentState.validate()) {
+              if (_formState.currentState.validate()) {
                 _formState.currentState.save();
                 widget.onSave(_data);
                 Navigator.of(context).pop();
@@ -464,10 +441,8 @@ class _CardEditViewState extends State<CardEditView> {
   }
 
   String validatePublicID(String pubID) {
-    if (pubID.length == 0)
-      return null;
-    if (pubID.length != 16)
-      return "Must be empty or of length 16!";
+    if (pubID.length == 0) return null;
+    if (pubID.length != 16) return "Must be empty or of length 16!";
     String allowedChars = "0123456789ABCDEFGHJKLMNPRSTUWXYZ";
     for (int i = 0; i < pubID.length; i++) {
       if (!allowedChars.contains(pubID[i]))
@@ -475,8 +450,7 @@ class _CardEditViewState extends State<CardEditView> {
     }
     try {
       String decoded = CardCipher.decode(pubID);
-      if (decoded != null && decoded.length == 16)
-        return null;
+      if (decoded != null && decoded.length == 16) return null;
     } on Exception {
     } on Error {}
     return "Unable to parse ID!";

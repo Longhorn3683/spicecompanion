@@ -8,7 +8,6 @@ class ButtonControl {
   int writeCounter = 0;
 
   ButtonControl() {
-
     // get a list of all buttons
     ConnectionPool.inst.get().then((con) {
       buttonsRead(con).then((readButtons) {
@@ -16,7 +15,9 @@ class ButtonControl {
         for (var button in buttons) {
           button.active = false;
         }
-      }).whenComplete(() { con.free(); });
+      }).whenComplete(() {
+        con.free();
+      });
     }, onError: (e) {});
   }
 
@@ -36,8 +37,7 @@ class ButtonControl {
       buttonsFlushed = true;
       writeCounter++;
       return buttonsWrite(con, activeButtons).then((e) {
-        if (!buttonsFlushed)
-          _flushState();
+        if (!buttonsFlushed) _flushState();
       }).whenComplete(() {
         con.free();
         writeCounter--;
@@ -73,8 +73,7 @@ class ButtonControl {
   void vibrate() async {
     var vibrationMs = Settings.buttonVibrationDuration.toInt();
     if (vibrationMs > 1) {
-      Vibration.vibrate(
-          duration: vibrationMs);
+      //Vibration.vibrate(duration: vibrationMs);
     }
   }
 
@@ -104,32 +103,25 @@ class ButtonControl {
           notifier.value++;
         }
         return;
-      };
+      }
+      ;
       RenderBox box = btn.key.currentContext.findRenderObject();
       Offset start = box.localToGlobal(Offset.zero);
-      Rect rect = Rect.fromLTWH(
-          start.dx, start.dy,
-          box.size.width, box.size.height
-      );
+      Rect rect =
+          Rect.fromLTWH(start.dx, start.dy, box.size.width, box.size.height);
       bool flush = false;
       if (rect.contains(position)) {
         if (down) {
-          if (btn.pointers.add(pointer))
-            flush = true;
+          if (btn.pointers.add(pointer)) flush = true;
         } else {
-          if (btn.pointers.remove(pointer))
-            flush = true;
+          if (btn.pointers.remove(pointer)) flush = true;
         }
       } else if (btn.pointers.contains(pointer)) {
-        if (btn.pointers.remove(pointer))
-          flush = true;
+        if (btn.pointers.remove(pointer)) flush = true;
       }
       if (flush) {
         notifier.value++;
-        this.setState(
-            btn.name,
-            btn.pointers.isNotEmpty
-        );
+        this.setState(btn.name, btn.pointers.isNotEmpty);
       }
     });
   }
@@ -160,8 +152,7 @@ abstract class ButtonControlButtonState extends State {
         valueListenable: listenable,
         builder: (context, value, child) {
           return buildContent(context);
-        }
-    );
+        });
   }
 
   Widget buildContent(BuildContext context);

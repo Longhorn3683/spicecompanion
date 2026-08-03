@@ -17,7 +17,6 @@ import 'package:intl/intl.dart';
 import 'package:spicecompanion/spiceapi/spiceapi.dart';
 import 'package:spicecompanion/util/util.dart';
 import 'package:spicecompanion/platform/platform.dart';
-import 'package:vibration/vibration.dart';
 import 'package:mutex/mutex.dart';
 
 part 'servers.dart';
@@ -95,17 +94,14 @@ Widget getView(SpiceView view) {
       return SettingsView();
     default:
       return Material(
-        color: Colors.red,
-        child: Center(
-          child: Text(
-            'Unknown View \'$view\'',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            )
-          ),
-        )
-      );
+          color: Colors.red,
+          child: Center(
+            child: Text('Unknown View \'$view\'',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                )),
+          ));
   }
 }
 

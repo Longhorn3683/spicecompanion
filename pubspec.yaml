@@ -13,12 +13,12 @@ dependencies:
   pool: ^1.4.0
   intl: ^0.16.1
   shared_preferences: ^0.5.12+4
-  flutter_nfc_reader:
-    path: external/flutter-nfc-reader
+  #flutter_nfc_reader:
+  #  path: external/flutter-nfc-reader
   hex: ^0.1.2
   share: ^0.6.0+1
   path: ^1.8.0
-  vibration: ^1.7.3
+  #vibration: ^1.7.3
   path_provider: ^1.6.21
   mutex: ^1.1.0
   desktop_window: ^0.3.0

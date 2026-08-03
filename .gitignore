@@ -78,3 +78,6 @@ dist
 
 # Misc
 pax_global_header
+
+# FVM Version Cache
+.fvm/
