@@ -88,7 +88,7 @@ class _SettingsViewState extends State<SettingsView> {
               setState(() {});
             },
           ),
-          ListTile(
+          /*ListTile(
             title: Text("Button Vibration Duration: " +
                 Settings.buttonVibrationDuration.toInt().toString() +
                 "ms"),
@@ -103,7 +103,7 @@ class _SettingsViewState extends State<SettingsView> {
                 setState(() {});
               },
             ),
-          ),
+          ),*/
           ListTile(
             title: Text("Screen Quality: " +
                 Settings.screenQuality.toInt().toString() +

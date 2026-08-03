@@ -391,10 +391,10 @@ class _CardEditViewState extends State<CardEditView> {
                   onSaved: (String s) => _data.idTrigger = s.toUpperCase(),
                 ),
               ),
-              ListTile(
+              /*ListTile(
                 title: Text(""),
                 subtitle: Text("Tip: Tap your card to the back of your phone."),
-              ),
+              ),*/
             ],
           ),
         ),

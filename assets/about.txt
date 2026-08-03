@@ -1,3 +1,9 @@
+A fork of SpiceCompanion project
+by Longhorn3683
+
+Original: https://github.com/LupinThidr/spicecompanion
+Forked: https://github.com/Longhorn3683/spicecompanion
+
 Contributor List
 - viri
 - felix

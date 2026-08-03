@@ -1,3 +1,5 @@
+This is a fork of [SpiceCompanion](https://github.com/LupinThidr/spicecompanion) project.
+
 # SpiceCompanion
 The official companion app to SpiceTools. This app allows for remotely
 controlling and managing a running instance with the API enabled and

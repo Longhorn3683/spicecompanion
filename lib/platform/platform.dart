@@ -14,8 +14,7 @@ Future<String> _preferencesPathGet() async {
   if (Platform.isLinux || Platform.isMacOS) {
     var configPath = Path.join(Platform.environment["HOME"], ".config");
     Directory configDir = Directory(configPath);
-    if (!(await configDir.exists()))
-      configDir.create();
+    if (!(await configDir.exists())) configDir.create();
     return Path.join(configPath, filename);
   }
   throw UnsupportedError("Unsupported platform for preferences file.");
@@ -32,10 +31,8 @@ Future<void> _preferencesFileWrite(String content) async {
 Map _preferencesMapCache;
 
 Future<Map> _preferencesMapGet() async {
-
   // check cache first
-  if (_preferencesMapCache != null)
-    return _preferencesMapCache;
+  if (_preferencesMapCache != null) return _preferencesMapCache;
 
   // load from file
   try {
@@ -53,7 +50,7 @@ Future<void> _preferencesMapSet(Map map) {
 }
 
 Future<void> preferencesSetString(String key, String value) async {
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
     return SharedPreferences.getInstance().then((prefs) {
       prefs.setString(key, value);
     });
@@ -66,7 +63,7 @@ Future<void> preferencesSetString(String key, String value) async {
 }
 
 Future<void> preferencesSetStringList(String key, List<String> values) async {
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
     return SharedPreferences.getInstance().then((prefs) {
       prefs.setStringList(key, values);
     });
@@ -79,7 +76,7 @@ Future<void> preferencesSetStringList(String key, List<String> values) async {
 }
 
 Future<String> preferencesGetString(String key) async {
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
     return SharedPreferences.getInstance().then((prefs) {
       return prefs.getString(key);
     });
@@ -87,15 +84,14 @@ Future<String> preferencesGetString(String key) async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     var map = await _preferencesMapGet();
     var val = map[key];
-    if (val is String)
-      return val;
+    if (val is String) return val;
     return null;
   }
   return null;
 }
 
 Future<List> preferencesGetStringList(String key) async {
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
     return SharedPreferences.getInstance().then((prefs) {
       return prefs.getStringList(key);
     });
@@ -103,8 +99,7 @@ Future<List> preferencesGetStringList(String key) async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     var map = await _preferencesMapGet();
     var val = map[key];
-    if (val is List)
-      return val;
+    if (val is List) return val;
     return null;
   }
   return null;
@@ -114,13 +109,10 @@ bool isFullScreen = false;
 
 void fullscreenToggle() async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-
     // window fullscreen toggle
     isFullScreen = !isFullScreen;
     await DesktopWindow.setFullScreen(isFullScreen);
-
   } else {
-
     // navigation / title bar toggle
     if (!isFullScreen) {
       SystemChrome.setEnabledSystemUIOverlays([]);

@@ -310,7 +310,8 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               onPressed: () {
                 Navigator.of(context).pop();
                 String json = PatchManager.inst.getPatchesJSONOnline();
-                if (Platform.isAndroid || Platform.isIOS) Share.share(json);
+                if (Platform.isAndroid || Platform.isIOS || Platform.isOhos)
+                  Share.share(json);
               }),
           SimpleDialogOption(
               child: Row(
@@ -389,7 +390,8 @@ class _PatchesSubViewState extends State<PatchesSubView> {
               onPressed: () {
                 Navigator.of(context).pop();
                 String json = PatchManager.inst.getPatchesJSONCustom();
-                if (Platform.isAndroid || Platform.isIOS) Share.share(json);
+                if (Platform.isAndroid || Platform.isIOS || Platform.isOhos)
+                  Share.share(json);
               }),
           SimpleDialogOption(
               child: Row(
