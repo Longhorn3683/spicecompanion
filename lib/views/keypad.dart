@@ -49,16 +49,20 @@ class _KeypadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: InkWell(
-          enableFeedback: true, // may want to make this an option?
-          child: Center(
-            child: Text(_label,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: fontSize ?? 42.0, color: fontColor)),
-          ),
-          onTap: () {
-            if (this._cb != null) this._cb(_key);
-          }),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+            enableFeedback: true, // may want to make this an option?
+            child: Center(
+              child: Text(_label,
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: fontSize ?? 42.0, color: fontColor)),
+            ),
+            onTap: () {
+              if (this._cb != null) this._cb(_key);
+            }),
+      ),
     );
   }
 }
@@ -261,68 +265,114 @@ class _KeypadViewState extends State<KeypadView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key7, '7', keyCallback),
-              _KeypadButton(KeypadKey.Key8, '8', keyCallback),
-              _KeypadButton(KeypadKey.Key9, '9', keyCallback),
-            ],
+    return /*Expanded(
+      child: GridView(
+        gridDelegate:
+            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        children: [
+          _KeypadButton(KeypadKey.Key7, '7', keyCallback),
+          _KeypadButton(KeypadKey.Key8, '8', keyCallback),
+          _KeypadButton(KeypadKey.Key9, '9', keyCallback),
+          _KeypadButton(KeypadKey.Key4, '4', keyCallback),
+          _KeypadButton(KeypadKey.Key5, '5', keyCallback),
+          _KeypadButton(KeypadKey.Key6, '6', keyCallback),
+          _KeypadButton(KeypadKey.Key1, '1', keyCallback),
+          _KeypadButton(KeypadKey.Key2, '2', keyCallback),
+          _KeypadButton(KeypadKey.Key3, '3', keyCallback),
+          _KeypadButton(KeypadKey.Key0, '0', keyCallback),
+          _KeypadButton(KeypadKey.Key00, '00', keyCallback),
+          _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
+          _KeypadButton(
+            KeypadKey.KeyMode,
+            getModeString(),
+            keyCallback,
+            fontSize: 28,
+            fontColor: getModeColor(),
           ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key4, '4', keyCallback),
-              _KeypadButton(KeypadKey.Key5, '5', keyCallback),
-              _KeypadButton(KeypadKey.Key6, '6', keyCallback),
-            ],
+          _KeypadButton(
+            KeypadKey.KeyInsert,
+            'Insert Card',
+            keyCallback,
+            fontSize: 28,
+            fontColor: Colors.deepOrange,
           ),
+          _KeypadButton(KeypadKey.KeyNone, '', keyCallback),
+        ],
+      ),
+    );*/
+
+        CustomScrollView(
+      physics: NeverScrollableScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          title: Text('Keypad'),
         ),
-        Expanded(
-          child: Row(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              _KeypadButton(KeypadKey.Key1, '1', keyCallback),
-              _KeypadButton(KeypadKey.Key2, '2', keyCallback),
-              _KeypadButton(KeypadKey.Key3, '3', keyCallback),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key0, '0', keyCallback),
-              _KeypadButton(KeypadKey.Key00, '00', keyCallback),
-              _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(
-                KeypadKey.KeyMode,
-                getModeString(),
-                keyCallback,
-                fontSize: 28,
-                fontColor: getModeColor(),
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    _KeypadButton(KeypadKey.Key7, '7', keyCallback),
+                    _KeypadButton(KeypadKey.Key8, '8', keyCallback),
+                    _KeypadButton(KeypadKey.Key9, '9', keyCallback),
+                  ],
+                ),
               ),
-              _KeypadButton(
-                KeypadKey.KeyInsert,
-                'Insert Card',
-                keyCallback,
-                fontSize: 28,
-                fontColor: Colors.deepOrange,
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    _KeypadButton(KeypadKey.Key4, '4', keyCallback),
+                    _KeypadButton(KeypadKey.Key5, '5', keyCallback),
+                    _KeypadButton(KeypadKey.Key6, '6', keyCallback),
+                  ],
+                ),
               ),
-              _KeypadButton(KeypadKey.KeyNone, '', keyCallback),
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    _KeypadButton(KeypadKey.Key1, '1', keyCallback),
+                    _KeypadButton(KeypadKey.Key2, '2', keyCallback),
+                    _KeypadButton(KeypadKey.Key3, '3', keyCallback),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    _KeypadButton(KeypadKey.Key0, '0', keyCallback),
+                    _KeypadButton(KeypadKey.Key00, '00', keyCallback),
+                    _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    _KeypadButton(
+                      KeypadKey.KeyMode,
+                      getModeString(),
+                      keyCallback,
+                      fontSize: 28,
+                      fontColor: getModeColor(),
+                    ),
+                    _KeypadButton(
+                      KeypadKey.KeyInsert,
+                      'Insert Card',
+                      keyCallback,
+                      fontSize: 28,
+                      fontColor: Colors.deepOrange,
+                    ),
+                    _KeypadButton(KeypadKey.KeyNone, '', keyCallback),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ],
-    ));
+    );
   }
 }

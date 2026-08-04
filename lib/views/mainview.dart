@@ -9,15 +9,15 @@ String gameExt = "";
 Duration lastPing = Duration(seconds: 1);
 
 enum SpiceTheme { Light, Dark }
+
 final spiceThemes = {
   SpiceTheme.Light: ThemeData(
+    useMaterial3: true,
     brightness: Brightness.light,
-    primarySwatch: Colors.indigo,
   ),
-
   SpiceTheme.Dark: ThemeData(
+    useMaterial3: true,
     brightness: Brightness.dark,
-    primarySwatch: Colors.blue,
   )
 };
 SpiceTheme currentTheme;
@@ -49,31 +49,26 @@ class _MainViewState extends State<MainView> {
   }
 
   void _gameTimerReset() {
-
     // cancel old
-    if (_gameTimer != null)
-      _gameTimer.cancel();
+    if (_gameTimer != null) _gameTimer.cancel();
 
     // create new timer
     _gameTimer = Timer.periodic(
         Duration(
           seconds: 1,
         ),
-        _gameTimerTick
-    );
+        _gameTimerTick);
 
     // instant tick
     _gameTimerTick(null);
   }
 
   void _gameTimerTick(Timer _) {
-
     // ignore if currently processing
     if (_gameTickActive) return;
 
     // query
     ConnectionPool.inst.get().then((con) {
-
       // lock
       if (_gameTickActive) return;
       _gameTickActive = true;
@@ -84,7 +79,6 @@ class _MainViewState extends State<MainView> {
         lastPing = t2.difference(t1);
         var tDiff = lastPing.inMilliseconds;
         setState(() {
-
           // get info
           gameModel = avs["model"];
           gameDest = avs["dest"];
@@ -96,18 +90,13 @@ class _MainViewState extends State<MainView> {
           _gameName = "$gameModel:$gameDest:$gameSpec:$gameRev:$gameExt";
           _gameServer = "${con.host}:${con.port}@${tDiff}ms";
         });
-
       }).whenComplete(() {
         con.free();
       });
-
     }).whenComplete(() {
-
       // unlock
       _gameTickActive = false;
-
     }).catchError((e) {
-
       // reset info
       gameModel = "";
       gameDest = "";
@@ -124,275 +113,91 @@ class _MainViewState extends State<MainView> {
     });
   }
 
+  int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         theme: spiceThemes[currentTheme],
-        home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter state) {
-              return Scaffold(
-                appBar: AppBar(
-                  toolbarHeight: toolbarHidden ? 0 : null,
-                  title: Text(getViewName(_currentView)),
-                  elevation: 5.0,
-                  actions: () {
-                    var list = <Widget>[];
-                    if (_currentView == SpiceView.Controller) {
-                      list.add(
-                          Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  controllerViewNo.value++;
-                                  setState(() {});
-                                },
-                                child: Icon(
-                                  Icons.autorenew,
-                                  size: 26.0,
-                                ),
-                              )
-                          )
-                      );
-                    }
-                    if (_currentView == SpiceView.Screen) {
-                      list.add(
-                        Padding(
-                          padding: EdgeInsets.only(right: 20.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              screensViewNo.value++;
-                            },
-                            child: Icon(
-                              Icons.refresh,
-                              size: 26.0,
-                            ),
-                          )
-                        )
-                      );
-                      /*list.add(
-                          Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  ConnectionPool.inst.get().then((con) {
-                                    captureGetJPG(con,
-                                        screen: 0,
-                                        divide: 2,
-                                        quality: 50).then((capture) async {
-                                      // only works on iOS apparently
-                                      var dir = await getDownloadsDirectory();
-                                      var path = dir.path;
-                                      var now = DateTime.now();
-                                      var fmt = DateFormat("yyy-MM-dd_HH-mm-ss");
-                                      var nowFmt = fmt.format(now);
-                                      var file = File("$path/spice_$nowFmt.jpg");
-                                      await file.writeAsBytes(
-                                          capture.data.toList(growable: false),
-                                          flush: true);
-                                      setState(() {});
-                                    }).whenComplete(() => con.free());
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.save,
-                                  size: 26.0,
-                                ),
-                              )
-                          )
-                      );*/
-                      list.add(
-                        Padding(
-                          padding: EdgeInsets.only(right: 20.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              ConnectionPool.inst.get().then((con) {
-                                captureGetJPG(con,
-                                  screen: screensCaptureNo,
-                                  divide: 2,
-                                  quality: 50).then((capture) async {
-                                    var dir = await getApplicationDocumentsDirectory();
-                                    var path = dir.path;
-                                    var file = File("$path/capture.jpg");
-                                    await file.writeAsBytes(
-                                        capture.data.toList(growable: false),
-                                        flush: true);
-                                    Share.shareFiles(<String>[file.path],
-                                        mimeTypes: <String>["image/jpeg"]);
-                                    setState(() {});
-                                }).whenComplete(() => con.free());
-                              });
-                            },
-                            child: Icon(
-                              Icons.share,
-                              size: 26.0,
-                            ),
-                          )
-                        )
-                      );
-                    }
-                    list.add(
-                      Padding(
-                        padding: EdgeInsets.only(right: 20.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            if (!isFullScreen) {
-                              setState(() {
-                                toolbarHidden = !toolbarHidden;
-                              });
-                            }
-                            fullscreenToggle();
-                          },
-                          onLongPress: () {
-                            setState(() {
-                              toolbarHidden = !toolbarHidden;
-                            });
-                          },
-                          child: Icon(
-                            Icons.aspect_ratio,
-                            size: 26.0,
-                          ),
-                        )
-                      )
-                    );
-                    return list;
-                  } (),
+        home:
+            StatefulBuilder(builder: (BuildContext context, StateSetter state) {
+          return Scaffold(
+            body: Listener(
+              onPointerDown: (p) {
+                if (toolbarHidden && p.position.dy < 16) {
+                  setState(() {
+                    toolbarHidden = false;
+                  });
+                }
+              },
+              child: _viewWidget,
+            ),
+            drawer: NavigationDrawer(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (int index) {
+                selectedIndex = index;
+                setState(() {
+                  _setView(SpiceView.values[index]);
+                  Navigator.of(context).pop();
+                });
+              },
+              children: <Widget>[
+                /*UserAccountsDrawerHeader(
+                    accountName: Text(_gameName),
+                    accountEmail: Text(_gameServer),
+                    //currentAccountPicture: _gameAvatar,
+                  ),*/
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.info),
+                  label: Text(getViewName(SpiceView.Info)),
                 ),
-                body: Listener(
-                  onPointerDown: (p) {
-                    if (toolbarHidden && p.position.dy < 16) {
-                      setState(() {
-                        toolbarHidden = false;
-                      });
-                    }
-                  },
-                  child: _viewWidget,
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.credit_card),
+                  label: Text(getViewName(SpiceView.CardManager)),
                 ),
-                drawer: Drawer(
-                  child: ListView(
-                    children: <Widget>[
-                      UserAccountsDrawerHeader(
-                        accountName: Text(_gameName),
-                        accountEmail: Text(_gameServer),
-                        currentAccountPicture: _gameAvatar,
-                      ),
-
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Servers)),
-                          trailing: Icon(Icons.cloud),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Servers);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-
-                      Divider(),
-
-                      ListTile(
-                          title: Text(getViewName(SpiceView.CardManager)),
-                          trailing: Icon(Icons.credit_card),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.CardManager);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Keypad)),
-                          trailing: Icon(Icons.dialpad),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Keypad);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Patches)),
-                          trailing: Icon(Icons.memory),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Patches);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-
-                      Divider(),
-
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Screen)),
-                          trailing: Icon(Icons.cast),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Screen);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Controller)),
-                          trailing: Icon(Icons.gamepad),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Controller);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Buttons)),
-                          trailing: Icon(Icons.keyboard),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Buttons);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Analogs)),
-                          trailing: Icon(Icons.threesixty),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Analogs);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Lights)),
-                          trailing: Icon(Icons.lightbulb_outline),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Lights);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Coins)),
-                          trailing: Icon(Icons.monetization_on),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Coins);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-
-                      Divider(),
-
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Info)),
-                          trailing: Icon(Icons.info),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Info);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                      ListTile(
-                          title: Text(getViewName(SpiceView.Settings)),
-                          trailing: Icon(Icons.settings),
-                          onTap: () => setState(() {
-                            _setView(SpiceView.Settings);
-                            Navigator.of(context).pop();
-                          })
-                      ),
-                    ],
-                  ),
+                Divider(),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.dialpad),
+                  label: Text(getViewName(SpiceView.Keypad)),
                 ),
-              );
-            }
-        )
-    );
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.memory),
+                  label: Text(getViewName(SpiceView.Patches)),
+                ),
+                Divider(),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.cast),
+                  label: Text(getViewName(SpiceView.Screen)),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.gamepad),
+                  label: Text(getViewName(SpiceView.Controller)),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.keyboard),
+                  label: Text(getViewName(SpiceView.Buttons)),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.threesixty),
+                  label: Text(getViewName(SpiceView.Analogs)),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.lightbulb_outline),
+                  label: Text(getViewName(SpiceView.Lights)),
+                ),
+                Divider(),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.settings),
+                  label: Text(getViewName(SpiceView.Settings)),
+                ),
+              ],
+            ),
+          );
+        }));
   }
 
   void _setView(SpiceView view) {
-    if (_currentView == view)
-      return;
+    if (_currentView == view) return;
     _currentView = view;
     _viewWidget = getView(_currentView);
   }

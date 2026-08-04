@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "spicedev.spicecompanion"
+        namespace "io.longhorn3683.spice"
         minSdkVersion 19
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()

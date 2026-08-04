@@ -17,6 +17,7 @@ void _setTargetPlatformForDesktop() {
   if (targetPlatform != null) {
     debugDefaultTargetPlatformOverride = targetPlatform;
   }
+  print("Target platform override: " + targetPlatform.toString());
 }
 
 void main() async {

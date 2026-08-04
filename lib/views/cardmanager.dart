@@ -72,166 +72,142 @@ class _CardManagerViewState extends State<CardManagerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // build card list from `cardList`
-      body: ListView(
-          children: cardList.map((CardInfo card) {
-        return ListTile(
-          title: Text(
-            card.name + (card.active ? " (Active)" : ""),
-            style: TextStyle(color: card.active ? Colors.green : null),
+    // build card list from `cardList`
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar.large(
+          leading: IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
-          subtitle: Text(card.id),
-          onTap: () {
-            // ask which player if multiple readers are present
-            if (getPlayerCount(gameModel) <= 1) {
-              // check if enough time has passed since last insert
-              var now = DateTime.now();
-              if (now.difference(insertLast) > insertGap) {
-                insertLast = now;
-                _insertCard(0, card.id);
-              }
-            } else {
-              _showInsert(card);
-            }
-          },
-          onLongPress: () => _showOptions(card),
-        );
-      }).toList()),
-
-      // 'Add Card' Button
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (BuildContext context) {
-              return CardEditView(
-                onSave: (CardInfo card) {
-                  setState(() => cardList.add(card));
-                  cardListSave();
-                },
-              );
-            }),
-          );
-        },
-      ),
-    );
-  }
-
-  void _showOptions(CardInfo card) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => SimpleDialog(
-        children: <Widget>[
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.edit),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text('Edit \'${card.name}\''),
-                  ),
-                ],
-              ),
+          title: Text('Cards'),
+          actions: <Widget>[
+            // 'Add Card' Button
+            IconButton(
+              icon: Icon(Icons.add),
               onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => CardEditView(
-                      baseDetails: card,
-                      onSave: (CardInfo newCard) {
-                        setState(() {
-                          card.name = newCard.name;
-                          card.id = newCard.id;
-                          card.idTrigger = newCard.idTrigger;
-                        });
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return CardEditView(
+                      onSave: (CardInfo card) {
+                        setState(() => cardList.add(card));
                         cardListSave();
                       },
-                    ),
-                  ),
+                    );
+                  },
                 );
-              }),
-          SimpleDialogOption(
-            child: Row(
-              children: <Widget>[
-                Icon(card.active
-                    ? Icons.indeterminate_check_box
-                    : Icons.check_box),
-                Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text(card.active
-                        ? "Remove active status"
-                        : "Set to active card")),
-              ],
+              },
             ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-                if (!card.active) {
-                  for (var i in cardList) i.active = false;
-                  card.active = true;
-                } else
-                  card.active = false;
-              });
-              cardListSave();
-            },
-          ),
-          SimpleDialogOption(
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.delete),
-                Container(
-                  margin: EdgeInsets.only(left: 5),
-                  child: Text('Remove'),
+          ],
+        ),
+        SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate(cardList.map((CardInfo card) {
+              return Card(
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  contentPadding: EdgeInsets.only(left: 16, right: 8),
+                  title: Text(
+                    card.name + (card.active ? " (Active)" : ""),
+                    style: TextStyle(color: card.active ? Colors.green : null),
+                  ),
+                  subtitle: Text(card.id),
+                  trailing: MenuAnchor(
+                    builder: (
+                      BuildContext context,
+                      MenuController controller,
+                      Widget child,
+                    ) {
+                      return IconButton(
+                        icon: Icon(Icons.more_vert),
+                        onPressed: () {
+                          // ask which player if multiple readers are present
+                          if (getPlayerCount(gameModel) <= 1) {
+                            // check if enough time has passed since last insert
+                            var now = DateTime.now();
+                            if (now.difference(insertLast) > insertGap) {
+                              insertLast = now;
+                              _insertCard(0, card.id);
+                            }
+                          } else {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          }
+                        },
+                      );
+                    },
+                    menuChildren: [
+                      MenuItemButton(
+                        leadingIcon: Icon(Icons.send),
+                        child: Text('Insert to P1'),
+                        onPressed: () => _insertCard(0, card.id),
+                      ),
+                      MenuItemButton(
+                        leadingIcon: Icon(Icons.send),
+                        child: Text('Insert to P2'),
+                        onPressed: () => _insertCard(1, card.id),
+                      ),
+                      Divider(),
+                      MenuItemButton(
+                          leadingIcon: Icon(Icons.edit),
+                          child: Text('Edit \'${card.name}\''),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return CardEditView(
+                                  baseDetails: card,
+                                  onSave: (CardInfo newCard) {
+                                    setState(() {
+                                      card.name = newCard.name;
+                                      card.id = newCard.id;
+                                      card.idTrigger = newCard.idTrigger;
+                                    });
+                                    cardListSave();
+                                  },
+                                );
+                              },
+                            );
+                          }),
+                      MenuItemButton(
+                        leadingIcon: Icon(card.active
+                            ? Icons.indeterminate_check_box
+                            : Icons.check_box),
+                        child: Text(card.active
+                            ? "Remove active status"
+                            : "Set to active card"),
+                        onPressed: () {
+                          setState(() {
+                            if (!card.active) {
+                              for (var i in cardList) i.active = false;
+                              card.active = true;
+                            } else
+                              card.active = false;
+                          });
+                          cardListSave();
+                        },
+                      ),
+                      MenuItemButton(
+                        leadingIcon: Icon(Icons.delete),
+                        child: Text('Remove'),
+                        onPressed: () {
+                          setState(() => cardList.remove(card));
+                          cardListSave();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-            onPressed: () {
-              setState(() => cardList.remove(card));
-              cardListSave();
-              Navigator.of(context).pop();
-            },
+              );
+            }).toList()),
           ),
-        ],
-      ),
-    );
-  }
-
-  void _showInsert(CardInfo card) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => SimpleDialog(
-        children: <Widget>[
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.send),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Insert to P1"),
-                  ),
-                ],
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _insertCard(0, card.id);
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.send),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Insert to P2"),
-                  ),
-                ],
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _insertCard(1, card.id);
-              }),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -328,17 +304,15 @@ class _CardEditViewState extends State<CardEditView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.baseDetails == null ? 'Add Card' : 'Edit Card'),
-      ),
-      body: Form(
+    return AlertDialog(
+      title: Text(widget.baseDetails == null ? 'Add Card' : 'Edit Card'),
+      content: Form(
         key: _formState,
-        child: NoOverglow(
-          child: ListView(
+        child: SingleChildScrollView(
+          child: Column(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.account_circle),
+                //leading: Icon(Icons.account_circle),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.name,
@@ -352,7 +326,7 @@ class _CardEditViewState extends State<CardEditView> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.credit_card),
+                //leading: Icon(Icons.credit_card),
                 title: TextFormField(
                   controller: cardIDController,
                   autocorrect: false,
@@ -367,7 +341,7 @@ class _CardEditViewState extends State<CardEditView> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.public),
+                //leading: Icon(Icons.public),
                 title: TextFormField(
                   controller: pubIDController,
                   autocorrect: false,
@@ -379,7 +353,7 @@ class _CardEditViewState extends State<CardEditView> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.nfc),
+                //leading: Icon(Icons.nfc),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.idTrigger,
@@ -399,32 +373,29 @@ class _CardEditViewState extends State<CardEditView> {
           ),
         ),
       ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          TextButton(
-            child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
-            onPressed: () {
-              if (_formState.currentState.validate()) {
-                _formState.currentState.save();
-                widget.onSave(_data);
-                Navigator.of(context).pop();
-              } else {
-                setState(() {
-                  // upon trying to add/write invalid data,
-                  // it'll be validated every time the fields change
-                  // until you save it.
-                  _autoValidateFields = AutovalidateMode.always;
-                });
-              }
-            },
-          ),
-        ],
-      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
+          onPressed: () {
+            if (_formState.currentState.validate()) {
+              _formState.currentState.save();
+              widget.onSave(_data);
+              Navigator.of(context).pop();
+            } else {
+              setState(() {
+                // upon trying to add/write invalid data,
+                // it'll be validated every time the fields change
+                // until you save it.
+                _autoValidateFields = AutovalidateMode.always;
+              });
+            }
+          },
+        ),
+      ],
     );
   }
 

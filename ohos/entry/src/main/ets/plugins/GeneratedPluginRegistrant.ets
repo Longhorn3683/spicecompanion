@@ -1,5 +1,6 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
 import PathProviderPlugin from 'path_provider_ohos';
+import SharePlusOhosPlugin from 'share_plus';
 import SharedPreferencesPlugin from 'shared_preferences_ohos';
 
 /**
@@ -15,6 +16,7 @@ export class GeneratedPluginRegistrant {
   static registerWith(flutterEngine: FlutterEngine) {
     try {
       flutterEngine.getPlugins()?.add(new PathProviderPlugin());
+      flutterEngine.getPlugins()?.add(new SharePlusOhosPlugin());
       flutterEngine.getPlugins()?.add(new SharedPreferencesPlugin());
     } catch (e) {
       Log.e(

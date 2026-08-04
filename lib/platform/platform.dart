@@ -1,7 +1,6 @@
-library platform;
-
-import 'dart:io' show Platform, File, Directory;
+import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,7 +49,10 @@ Future<void> _preferencesMapSet(Map map) {
 }
 
 Future<void> preferencesSetString(String key, String value) async {
-  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
+  if (Platform.isAndroid ||
+          Platform.isIOS ||
+          defaultTargetPlatform == TargetPlatform.ohos //|| Platform.isOhos
+      ) {
     return SharedPreferences.getInstance().then((prefs) {
       prefs.setString(key, value);
     });
@@ -63,7 +65,10 @@ Future<void> preferencesSetString(String key, String value) async {
 }
 
 Future<void> preferencesSetStringList(String key, List<String> values) async {
-  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
+  if (Platform.isAndroid ||
+          Platform.isIOS ||
+          defaultTargetPlatform == TargetPlatform.ohos //|| Platform.isOhos
+      ) {
     return SharedPreferences.getInstance().then((prefs) {
       prefs.setStringList(key, values);
     });
@@ -76,7 +81,10 @@ Future<void> preferencesSetStringList(String key, List<String> values) async {
 }
 
 Future<String> preferencesGetString(String key) async {
-  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
+  if (Platform.isAndroid ||
+          Platform.isIOS ||
+          defaultTargetPlatform == TargetPlatform.ohos //|| Platform.isOhos
+      ) {
     return SharedPreferences.getInstance().then((prefs) {
       return prefs.getString(key);
     });
@@ -91,7 +99,10 @@ Future<String> preferencesGetString(String key) async {
 }
 
 Future<List> preferencesGetStringList(String key) async {
-  if (Platform.isAndroid || Platform.isIOS || Platform.isOhos) {
+  if (Platform.isAndroid ||
+          Platform.isIOS ||
+          defaultTargetPlatform == TargetPlatform.ohos //|| Platform.isOhos
+      ) {
     return SharedPreferences.getInstance().then((prefs) {
       return prefs.getStringList(key);
     });
@@ -115,10 +126,10 @@ void fullscreenToggle() async {
   } else {
     // navigation / title bar toggle
     if (!isFullScreen) {
-      SystemChrome.setEnabledSystemUIOverlays([]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
       isFullScreen = true;
     } else {
-      SystemChrome.setEnabledSystemUIOverlays([
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
         SystemUiOverlay.top,
         SystemUiOverlay.bottom,
       ]);

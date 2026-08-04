@@ -22,7 +22,7 @@ class Connection {
       {this.resource, bool refreshSession=true}) {
 
     // initialize
-    _dataBuffer = List<int>();
+    _dataBuffer = <int>[];
     _responses = StreamController<Response>.broadcast();
     _connections = StreamController<Connection>.broadcast();
     if (pass.length > 0)

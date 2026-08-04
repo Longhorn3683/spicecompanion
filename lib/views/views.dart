@@ -7,12 +7,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:spicecompanion/spiceapi/spiceapi.dart';
 import 'package:spicecompanion/util/util.dart';
@@ -25,7 +22,6 @@ part 'keypad.dart';
 part 'buttons.dart';
 part 'analogs.dart';
 part 'lights.dart';
-part 'coins.dart';
 part 'patches.dart';
 part 'info.dart';
 part 'resources.dart';
@@ -50,7 +46,7 @@ part 'controllers/drs.dart';
 part 'controllers/we.dart';
 
 enum SpiceView {
-  Servers,
+  Info,
   CardManager,
   Keypad,
   Patches,
@@ -59,17 +55,13 @@ enum SpiceView {
   Buttons,
   Analogs,
   Lights,
-  Coins,
-  Info,
   Settings,
 }
 
-SpiceView defaultSpiceView = SpiceView.Servers;
+SpiceView defaultSpiceView = SpiceView.Info;
 
 Widget getView(SpiceView view) {
   switch (view) {
-    case SpiceView.Servers:
-      return ServerView();
     case SpiceView.CardManager:
       return CardManagerView();
     case SpiceView.Keypad:
@@ -88,8 +80,6 @@ Widget getView(SpiceView view) {
       return LightsView();
     case SpiceView.Info:
       return InfoView();
-    case SpiceView.Coins:
-      return CoinsView();
     case SpiceView.Settings:
       return SettingsView();
     default:
@@ -105,12 +95,37 @@ Widget getView(SpiceView view) {
   }
 }
 
+Icon getViewIcon(SpiceView view) {
+  switch (view) {
+    case SpiceView.CardManager:
+      return Icon(Icons.credit_card);
+    case SpiceView.Keypad:
+      return Icon(Icons.dialpad);
+    case SpiceView.Patches:
+      return Icon(Icons.memory);
+    case SpiceView.Screen:
+      return Icon(Icons.cast);
+    case SpiceView.Controller:
+      return Icon(Icons.gamepad);
+    case SpiceView.Buttons:
+      return Icon(Icons.keyboard);
+    case SpiceView.Analogs:
+      return Icon(Icons.threesixty);
+    case SpiceView.Lights:
+      return Icon(Icons.lightbulb_outline);
+    case SpiceView.Info:
+      return Icon(Icons.info);
+    case SpiceView.Settings:
+      return Icon(Icons.settings);
+    default:
+      return Icon(Icons.error);
+  }
+}
+
 String getViewName(SpiceView view) {
   switch (view) {
-    case SpiceView.Servers:
-      return 'Servers';
     case SpiceView.CardManager:
-      return 'Card Manager';
+      return 'Cards';
     case SpiceView.Keypad:
       return 'Keypad/Scanner';
     case SpiceView.Patches:
@@ -125,8 +140,6 @@ String getViewName(SpiceView view) {
       return 'Analogs';
     case SpiceView.Lights:
       return 'Lights';
-    case SpiceView.Coins:
-      return 'Coins';
     case SpiceView.Info:
       return 'Server Information';
     case SpiceView.Settings:

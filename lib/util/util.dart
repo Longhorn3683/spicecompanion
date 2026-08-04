@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hex/hex.dart';
 import 'package:pool/pool.dart';

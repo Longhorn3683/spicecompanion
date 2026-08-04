@@ -77,10 +77,15 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        children: <Widget>[
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar.large(
+          title: Text('Settings'),
+        ),
+        SliverList(
+            delegate: SliverChildListDelegate([
           SwitchListTile(
+            secondary: Icon(Icons.dark_mode),
             title: Text("Dark Mode"),
             value: Settings.darkMode,
             onChanged: (value) {
@@ -88,6 +93,7 @@ class _SettingsViewState extends State<SettingsView> {
               setState(() {});
             },
           ),
+          Divider(),
           /*ListTile(
             title: Text("Button Vibration Duration: " +
                 Settings.buttonVibrationDuration.toInt().toString() +
@@ -112,7 +118,10 @@ class _SettingsViewState extends State<SettingsView> {
               value: Settings.screenQuality,
               min: 0,
               max: 100,
+              divisions: 100,
               onChanged: (value) {
+                print(
+                    "Settings: screen quality changed to " + value.toString());
                 Settings.screenQuality = value;
                 Settings.save();
                 setState(() {});
@@ -126,6 +135,7 @@ class _SettingsViewState extends State<SettingsView> {
               value: Settings.screenThreads,
               min: 1,
               max: 10,
+              divisions: 9,
               onChanged: (value) {
                 Settings.screenThreads = value;
                 Settings.save();
@@ -140,6 +150,7 @@ class _SettingsViewState extends State<SettingsView> {
               value: Settings.screenDivide,
               min: 1,
               max: 16,
+              divisions: 15,
               onChanged: (value) {
                 Settings.screenDivide = value;
                 Settings.save();
@@ -147,46 +158,7 @@ class _SettingsViewState extends State<SettingsView> {
               },
             ),
           ),
-          ListTile(
-            title: Text("Restart Game"),
-            onTap: () {
-              ConnectionPool.inst.get().then((con) {
-                controlRestart(con)
-                    .catchError((e) {})
-                    .whenComplete(() => con.free());
-              }, onError: (e) {});
-            },
-          ),
-          ListTile(
-            title: Text("Kill Game"),
-            onTap: () {
-              ConnectionPool.inst.get().then((con) {
-                controlExit(con, 0)
-                    .catchError((e) {})
-                    .whenComplete(() => con.free());
-              }, onError: (e) {});
-            },
-          ),
-          ListTile(
-            title: Text("Force Shutdown"),
-            onTap: () {
-              ConnectionPool.inst.get().then((con) {
-                controlShutdown(con)
-                    .catchError((e) {})
-                    .whenComplete(() => con.free());
-              }, onError: (e) {});
-            },
-          ),
-          ListTile(
-            title: Text("Force Reboot"),
-            onTap: () {
-              ConnectionPool.inst.get().then((con) {
-                controlReboot(con)
-                    .catchError((e) {})
-                    .whenComplete(() => con.free());
-              }, onError: (e) {});
-            },
-          ),
+          Divider(),
           ListTile(
             title: Text("Licenses"),
             onTap: () {
@@ -201,8 +173,8 @@ class _SettingsViewState extends State<SettingsView> {
               );
             },
           ),
-        ],
-      ),
+        ]))
+      ],
     );
   }
 }

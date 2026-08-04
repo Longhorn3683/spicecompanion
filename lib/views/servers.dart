@@ -87,58 +87,72 @@ class _ServerViewState extends State<ServerView> {
   @override
   Widget build(BuildContext context) {
     var hasConnection = ConnectionPool.inst.hasConnection();
-    return Scaffold(
-      // Build server list from `serverList`
-      body: ListView(
-          children: serverList.map((ServerInfo s) {
-        var isCon = ConnectionPool.inst.isActive(s.address, s.port, s.pass);
-        var isConStr = isCon ? " (Active)" : "";
-        if (isCon && !hasConnection) isConStr = " (Disconnected)";
-        return ListTile(
-          title: Text(
-            "${s.name}$isConStr",
-            style: !isCon
-                ? null
-                : TextStyle(
-                    color: hasConnection ? Colors.lightGreen : Colors.orange),
-          ),
-          subtitle: Text('${s.address}:${s.port}'),
-          onTap: () {
-            // check for connect/disconnect
-            if (!isCon)
-              _tryConnect(s);
-            else {
-              // show disconnect info
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Disconnected."),
-                backgroundColor: Colors.orange,
-                duration: Duration(milliseconds: 500),
-              ));
+    // Build server list from `serverList`
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          title: Text('Servers'),
+          backgroundColor: Colors.transparent,
+          actions: <Widget>[
+            // 'Add Server' Button
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return ServerEditView(
+                      onSave: (ServerInfo server) {
+                        setState(() => serverList.add(server));
+                        saveServerList();
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        SliverList(
+          delegate: SliverChildListDelegate(
+            serverList.map((ServerInfo s) {
+              var isCon =
+                  ConnectionPool.inst.isActive(s.address, s.port, s.pass);
+              var isConStr = isCon ? " (Active)" : "";
+              if (isCon && !hasConnection) isConStr = " (Disconnected)";
+              return ListTile(
+                title: Text(
+                  "${s.name}$isConStr",
+                  style: !isCon
+                      ? null
+                      : TextStyle(
+                          color: hasConnection
+                              ? Colors.lightGreen
+                              : Colors.orange),
+                ),
+                subtitle: Text('${s.address}:${s.port}'),
+                onTap: () {
+                  // check for connect/disconnect
+                  if (!isCon)
+                    _tryConnect(s);
+                  else {
+                    // show disconnect info
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Disconnected."),
+                      backgroundColor: Colors.orange,
+                      duration: Duration(milliseconds: 500),
+                    ));
 
-              ConnectionPool.inst.disconnect();
-              setState(() {});
-            }
-          },
-          onLongPress: () => _showOptions(s),
-        );
-      }).toList()),
-
-      // 'Add Server' Button
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (BuildContext context) {
-              return ServerEditView(
-                onSave: (ServerInfo server) {
-                  setState(() => serverList.add(server));
-                  saveServerList();
+                    ConnectionPool.inst.disconnect();
+                    setState(() {});
+                  }
                 },
+                onLongPress: () => _showOptions(s),
               );
-            }),
-          );
-        },
-      ),
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -211,9 +225,10 @@ class _ServerViewState extends State<ServerView> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => ServerEditView(
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return ServerEditView(
                       baseDetails: server,
                       onSave: (ServerInfo newServer) {
                         setState(() {
@@ -224,8 +239,8 @@ class _ServerViewState extends State<ServerView> {
                         });
                         saveServerList();
                       },
-                    ),
-                  ),
+                    );
+                  },
                 );
               }),
           SimpleDialogOption(
@@ -281,17 +296,15 @@ class _ServerEditViewState extends State<ServerEditView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.baseDetails == null ? 'Add Server' : 'Edit Server'),
-      ),
-      body: Form(
+    return AlertDialog(
+      title: Text(widget.baseDetails == null ? 'Add Server' : 'Edit Server'),
+      content: Form(
         key: _formState,
-        child: NoOverglow(
-          child: ListView(
+        child: SingleChildScrollView(
+          child: Column(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.account_circle),
+                //leading: Icon(Icons.account_circle),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.name,
@@ -305,7 +318,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.cloud),
+                //leading: Icon(Icons.cloud),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.address,
@@ -320,7 +333,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.storage),
+                //leading: Icon(Icons.storage),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.port,
@@ -341,7 +354,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.lock),
+                //leading: Icon(Icons.lock),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.pass,
@@ -359,55 +372,34 @@ class _ServerEditViewState extends State<ServerEditView> {
           ),
         ),
       ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          TextButton(
-            child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
-            onPressed: () {
-              if (_formState.currentState.validate()) {
-                _formState.currentState.save();
-                widget.onSave(_data);
-                Navigator.of(context).pop();
-              } else {
-                setState(() {
-                  // upon trying to add/resave invalid data,
-                  // it'll be validated every time the fields change
-                  // until you save it.
-                  _autoValidateFields = AutovalidateMode.always;
-                });
-              }
-            },
-          ),
-        ],
-      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
+          onPressed: () {
+            if (_formState.currentState.validate()) {
+              _formState.currentState.save();
+              widget.onSave(_data);
+              Navigator.of(context).pop();
+            } else {
+              setState(() {
+                // upon trying to add/resave invalid data,
+                // it'll be validated every time the fields change
+                // until you save it.
+                _autoValidateFields = AutovalidateMode.always;
+              });
+            }
+          },
+        ),
+      ],
     );
   }
 
   String validateBasic(String s) {
     if (s.length == 0) return "Can't be empty!";
     return null;
-  }
-}
-
-// Captures ListView overglows (fx when you scroll too far in either direction)
-class NoOverglow extends StatelessWidget {
-  final Widget child;
-
-  NoOverglow({@required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<OverscrollIndicatorNotification>(
-      child: child,
-      onNotification: (notification) {
-        notification.disallowGlow();
-        return true;
-      },
-    );
   }
 }

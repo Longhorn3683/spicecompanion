@@ -6,7 +6,6 @@ class InfoView extends StatefulWidget {
 }
 
 class _InfoViewState extends State<InfoView> {
-
   Timer updateTimer;
   bool updateLock = false;
 
@@ -32,14 +31,12 @@ class _InfoViewState extends State<InfoView> {
   num _vmemUsed = 0;
 
   _InfoViewState() {
-    if (updateTimer != null)
-      updateTimer.cancel();
+    if (updateTimer != null) updateTimer.cancel();
     updateTimer = Timer.periodic(
-      Duration(
-        seconds: 1,
-      ),
-      infoTimerTick
-    );
+        Duration(
+          seconds: 1,
+        ),
+        infoTimerTick);
 
     // call it immediately for first update
     infoTimerTick(null);
@@ -47,8 +44,7 @@ class _InfoViewState extends State<InfoView> {
 
   @override
   void dispose() {
-    if (updateTimer != null)
-      updateTimer.cancel();
+    if (updateTimer != null) updateTimer.cancel();
     super.dispose();
   }
 
@@ -126,71 +122,275 @@ class _InfoViewState extends State<InfoView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: ListView(
-        children: <Widget>[
-          // AVS
-          _createDisplay('Model', _avsModel),
-          _createDisplay('Destination', _avsDest),
-          _createDisplay('Specification', _avsSpec),
-          _createDisplay('Revision', _avsRev),
-          _createDisplay('Extension', _avsExt),
-          _createDisplay('Services', _avsServices),
-
-          Divider(),
-
-          // Launcher Info
-          _createDisplay('Version', _launcherVersion),
-          _createDisplay(
-            'Compile Time',
-              _launcherCompileDate != null
-              ? _getDateTimeFromGCC(_launcherCompileDate, _launcherCompileTime)
-                : _disconnectMsg
-          ),
-          _createDisplay(
-            'System Time',
-            _launcherSystemTime != null
-              ? _formatSystemTime(_launcherSystemTime.toLocal())
-                : _disconnectMsg
-          ),
-          ListTile(
-            title: Text('Launch Args (${_launcherArgs.length-1})'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text('Launch Args'),
+    return CustomScrollView(slivers: [
+      SliverAppBar(
+        //toolbarHeight: toolbarHidden ? 0 : null,
+        actions: [
+          MenuAnchor(
+            builder: (
+              BuildContext context,
+              MenuController controller,
+              Widget child,
+            ) {
+              return IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+              );
+            },
+            menuChildren: [
+              SubmenuButton(
+                leadingIcon: Icon(Icons.monetization_on),
+                child: Text('Insert Coin'),
+                menuChildren: [
+                  MenuItemButton(
+                    child: Text('1 Coin'),
+                    onPressed: () => ConnectionPool.inst.get().then((con) {
+                      coinInsert(con, 1).whenComplete(() {
+                        con.free();
+                      });
+                    }, onError: (e) {}),
+                  ),
+                  MenuItemButton(
+                    child: Text('5 Coins'),
+                    onPressed: () => ConnectionPool.inst.get().then((con) {
+                      coinInsert(con, 5).whenComplete(() {
+                        con.free();
+                      });
+                    }, onError: (e) {}),
+                  ),
+                  MenuItemButton(
+                    child: Text('10 Coins'),
+                    onPressed: () => ConnectionPool.inst.get().then((con) {
+                      coinInsert(con, 10).whenComplete(() {
+                        con.free();
+                      });
+                    }, onError: (e) {}),
+                  ),
+                  /*MenuItemButton(
+                            child: Text('Custom'),
+                            onPressed: () =>
+                                ConnectionPool.inst.get().then((con) {
+                              coinInsert(con, 114514).whenComplete(() {
+                                con.free();
+                              });
+                              con.free();
+                            }, onError: (e) {}),
+                          ),*/
+                ],
+              ),
+              SubmenuButton(
+                leadingIcon: Icon(Icons.power_settings_new),
+                child: Text('Game Menu'),
+                menuChildren: [
+                  MenuItemButton(
+                    leadingIcon: Icon(Icons.restart_alt),
+                    child: Text("Restart Game"),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text('Restart Game?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  ConnectionPool.inst.get().then((con) {
+                                    controlRestart(con)
+                                        .catchError((e) {})
+                                        .whenComplete(() => con.free());
+                                  }, onError: (e) {});
+                                  Navigator.pop(context);
+                                }),
+                          ],
+                        );
+                      },
                     ),
-                    body: ListView(
-                      children: _getArgList(_launcherArgs),
-                    )
-                  );
-                }
-              )
-            )
+                  ),
+                  MenuItemButton(
+                    leadingIcon: Icon(Icons.close),
+                    child: Text("Kill Game"),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text('Kill Game?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                ConnectionPool.inst.get().then((con) {
+                                  controlExit(con, 0)
+                                      .catchError((e) {})
+                                      .whenComplete(() => con.free());
+                                }, onError: (e) {});
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  Divider(),
+                  MenuItemButton(
+                    leadingIcon: Icon(Icons.power_settings_new),
+                    child: Text("Force Shutdown"),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text('Force Shutdown?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  ConnectionPool.inst.get().then((con) {
+                                    controlShutdown(con)
+                                        .catchError((e) {})
+                                        .whenComplete(() => con.free());
+                                  }, onError: (e) {});
+                                  Navigator.pop(context);
+                                }),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  MenuItemButton(
+                    leadingIcon: Icon(Icons.restart_alt),
+                    child: Text("Force Reboot"),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text('Force Reboot?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  ConnectionPool.inst.get().then((con) {
+                                    controlReboot(con)
+                                        .catchError((e) {})
+                                        .whenComplete(() => con.free());
+                                  }, onError: (e) {});
+                                  Navigator.pop(context);
+                                }),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-
-          Divider(),
-
-          // Memory Usage
-          _createMemoryDisplay('Memory Usage', _memUsed, _memTotalUsed, _memTotal),
-          _createMemoryDisplay('Virtual Memory', _vmemUsed, _vmemTotalUsed, _vmemTotal),
+          /*list.add(
+                  IconButton(
+                    icon: Icon(Icons.aspect_ratio),
+                    onPressed: () {
+                      if (!isFullScreen) {
+                        setState(() {
+                          toolbarHidden = !toolbarHidden;
+                        });
+                      }
+                      fullscreenToggle();
+                    },
+                  ),
+                );*/
         ],
+        pinned: true,
       ),
-    );
+      SliverList(
+        delegate: SliverChildListDelegate(
+          [
+            ListTile(
+              title: Text('server list'),
+              onTap: () {
+                showModalBottomSheet(
+                    context: context,
+                    clipBehavior: Clip.antiAlias,
+                    builder: (context) => ServerView());
+              }, // blank onTap adds the interact splash like in android settings's info
+            ),
+            // AVS
+            _createDisplay('Model', _avsModel),
+            _createDisplay('Destination', _avsDest),
+            _createDisplay('Specification', _avsSpec),
+            _createDisplay('Revision', _avsRev),
+            _createDisplay('Extension', _avsExt),
+            _createDisplay('Services', _avsServices),
+
+            Divider(),
+
+            // Launcher Info
+            _createDisplay('Version', _launcherVersion),
+            _createDisplay(
+                'Compile Time',
+                _launcherCompileDate != null
+                    ? _getDateTimeFromGCC(
+                        _launcherCompileDate, _launcherCompileTime)
+                    : _disconnectMsg),
+            _createDisplay(
+                'System Time',
+                _launcherSystemTime != null
+                    ? _formatSystemTime(_launcherSystemTime.toLocal())
+                    : _disconnectMsg),
+            ListTile(
+                title: Text('Launch Args (${_launcherArgs.length - 1})'),
+                onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return Scaffold(
+                          appBar: AppBar(
+                            title: Text('Launch Args'),
+                          ),
+                          body: ListView(
+                            children: _getArgList(_launcherArgs),
+                          ));
+                    }))),
+
+            Divider(),
+
+            // Memory Usage
+            _createMemoryDisplay(
+                'Memory Usage', _memUsed, _memTotalUsed, _memTotal),
+            _createMemoryDisplay(
+                'Virtual Memory', _vmemUsed, _vmemTotalUsed, _vmemTotal),
+          ],
+        ),
+      ),
+    ]);
   }
 }
 
 String _formatSystemTime(DateTime date) =>
-  '${DateFormat('hh:mm:ssa').format(date)} on ${DateFormat.yMMMMd().format(date)}';
+    '${DateFormat('hh:mm:ssa').format(date)} on ${DateFormat.yMMMMd().format(date)}';
 
 // guaranteed format, see: https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html
 String _getDateTimeFromGCC(String date, String time) {
   var tmp = date.replaceAll('  ', ' ').split(' ');
-  if (tmp.length < 3)
-    return "";
+  if (tmp.length < 3) return "";
   return '${tmp[2]} ${tmp[0]} ${tmp[1]} at $time';
 }
 
@@ -203,7 +403,7 @@ List<ListTile> _getArgList(List<String> args) {
     bool skipNext = false;
 
     if (info2PartArgsLookup.contains(args[i])) {
-      option += ' ${args[i+1]}';
+      option += ' ${args[i + 1]}';
       skipNext = true;
     }
 
@@ -226,7 +426,8 @@ Widget _createDisplay(String title, String desc) {
   return ListTile(
     title: Text(title),
     subtitle: Text(desc),
-    onTap: () {}, // blank onTap adds the interact splash like in android settings's info
+    onTap:
+        () {}, // blank onTap adds the interact splash like in android settings's info
   );
 }
 
@@ -234,7 +435,8 @@ Widget _createDisplay(String title, String desc) {
 String _getMiB(num bytes) => (bytes * 9.53674e-7).toStringAsFixed(2);
 String _getGiB(num bytes) => (bytes * 9.31323e-10).toStringAsFixed(2);
 
-Widget _createMemoryDisplay(String name, num used, num usedOutOfTotal, num total) {
+Widget _createMemoryDisplay(
+    String name, num used, num usedOutOfTotal, num total) {
   return ListTile(
     title: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,20 +444,13 @@ Widget _createMemoryDisplay(String name, num used, num usedOutOfTotal, num total
         Text(name),
         Row(
           children: <Widget>[
-            Text(
-              '${_getMiB(used)}MiB / ',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.lightGreen
-              )
-            ),
-            Text(
-              '${_getGiB(usedOutOfTotal)}GiB / ${_getGiB(total)}GiB',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              )
-            )
+            Text('${_getMiB(used)}MiB / ',
+                style: const TextStyle(fontSize: 14, color: Colors.lightGreen)),
+            Text('${_getGiB(usedOutOfTotal)}GiB / ${_getGiB(total)}GiB',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ))
           ],
         )
       ],
@@ -263,6 +458,7 @@ Widget _createMemoryDisplay(String name, num used, num usedOutOfTotal, num total
     subtitle: LinearProgressIndicator(
       value: usedOutOfTotal / total,
     ),
-    onTap: () {}, // blank onTap adds the interact splash like in android settings's info
+    onTap:
+        () {}, // blank onTap adds the interact splash like in android settings's info
   );
 }

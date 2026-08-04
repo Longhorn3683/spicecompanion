@@ -21,16 +21,23 @@ dependencies:
   #flutter_nfc_reader:
   #  path: external/flutter-nfc-reader
   hex: ^0.1.2
-  share: ^0.6.0+1
+  #share: ^0.6.0+1
+  share_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/share_plus/share_plus
+      ref: sensors_plus-7.2.0-ohos.1.0.0-beta.1
   path: ^1.8.0
   #vibration: ^1.7.3
+  mutex: ^1.1.0
+  desktop_window: ^0.3.0
+
+dependency_overrides:
   path_provider:
     git:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
       path: packages/path_provider/path_provider
       ref: provider-v2.1.1-ohos-1.0.1
-  mutex: ^1.1.0
-  desktop_window: ^0.3.0
 
 dev_dependencies:
   #flutter_test:

@@ -25,13 +25,19 @@ class _PatchesViewState extends State<PatchesView> {
     return DefaultTabController(
         length: subViews.length,
         child: Scaffold(
-          appBar: TabBar(
-            isScrollable: true,
-            tabs: subViews.map((PatchesSubView subView) {
-              return Tab(
-                text: titles[subView.setting.index],
-              );
-            }).toList(),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+            title: Text('Patches'),
+            bottom: TabBar(
+              tabs: subViews.map((PatchesSubView subView) {
+                return Tab(
+                  text: titles[subView.setting.index],
+                );
+              }).toList(),
+            ),
           ),
           body: TabBarView(
             children: subViews,
@@ -275,72 +281,56 @@ class _PatchesSubViewState extends State<PatchesSubView> {
   _showAddOnlineDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) => SimpleDialog(
-        children: <Widget>[
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.file_download),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Download from URL"),
-                  ),
-                ],
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Online Patches"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.file_download),
+                title: Text("Download from URL"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return PatchDownloadView();
+                    },
+                  ).then((_) => update());
+                },
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => PatchDownloadView(),
-                      ),
-                    )
-                    .then((_) => update());
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.share),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Export all online patches"),
-                  ),
-                ],
+              ListTile(
+                leading: Icon(Icons.share),
+                title: Text("Export all online patches"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  String json = PatchManager.inst.getPatchesJSONOnline();
+                  if (Platform.isAndroid ||
+                          Platform.isIOS ||
+                          defaultTargetPlatform ==
+                              TargetPlatform.ohos //|| Platform.isOhos
+                      ) {
+                    Share.share(json);
+                  }
+                },
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                String json = PatchManager.inst.getPatchesJSONOnline();
-                if (Platform.isAndroid || Platform.isIOS || Platform.isOhos)
-                  Share.share(json);
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.cancel),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Cancel"),
-                  ),
-                ],
+              ListTile(
+                leading: Icon(Icons.delete_forever),
+                title: Text("Remove all online patches"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  PatchManager.inst.removeOnlinePatches();
+                  update();
+                },
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.delete_forever),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Remove all online patches"),
-                  ),
-                ],
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                PatchManager.inst.removeOnlinePatches();
-                update();
-              }),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ],
       ),
     );
@@ -349,78 +339,61 @@ class _PatchesSubViewState extends State<PatchesSubView> {
   _showAddCustomDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) => SimpleDialog(
-        children: <Widget>[
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.memory),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Add memory patch"),
-                  ),
-                ],
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => PatchAddCustomView(
-                          baseDetails: null,
-                          onSave: (patch) {
-                            PatchManager.inst.addPatch(patch);
-                            update();
-                          },
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Add Custom Patch"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.memory),
+                title: Text("Add memory patch"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context)
+                      .push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => PatchAddCustomView(
+                            baseDetails: null,
+                            onSave: (patch) {
+                              PatchManager.inst.addPatch(patch);
+                              update();
+                            },
+                          ),
                         ),
-                      ),
-                    )
-                    .then((_) => update());
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.share),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Export all custom patches"),
-                  ),
-                ],
+                      )
+                      .then((_) => update());
+                },
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                String json = PatchManager.inst.getPatchesJSONCustom();
-                if (Platform.isAndroid || Platform.isIOS || Platform.isOhos)
-                  Share.share(json);
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.cancel),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Cancel"),
-                  ),
-                ],
+              ListTile(
+                leading: Icon(Icons.share),
+                title: Text("Export all custom patches"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  String json = PatchManager.inst.getPatchesJSONCustom();
+                  if (Platform.isAndroid ||
+                          Platform.isIOS ||
+                          defaultTargetPlatform ==
+                              TargetPlatform.ohos //|| Platform.isOhos
+                      ) Share.share(json);
+                },
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              }),
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.delete_forever),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text("Remove all custom patches"),
-                  ),
-                ],
+              ListTile(
+                leading: Icon(Icons.delete_forever),
+                title: Text("Remove all custom patches"),
+                onTap: () {
+                  PatchManager.inst.removeCustomPatches();
+                  update();
+                  Navigator.of(context).pop();
+                },
               ),
-              onPressed: () {
-                PatchManager.inst.removeCustomPatches();
-                update();
-                Navigator.of(context).pop();
-              }),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ],
       ),
     );
@@ -496,17 +469,15 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Download patches from URL"),
-      ),
-      body: Form(
+    return AlertDialog(
+      title: Text("Download patches from URL"),
+      content: Form(
         key: _formState,
-        child: NoOverglow(
-          child: ListView(
+        child: SingleChildScrollView(
+          child: Column(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.cloud_download),
+                //leading: Icon(Icons.cloud_download),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _urlInput,
@@ -523,70 +494,33 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
           ),
         ),
       ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          TextButton(
-            child: Text("Download/Import"),
-            onPressed: () async {
-              if (_formState.currentState.validate()) {
-                _formState.currentState.save();
+      actions: <Widget>[
+        TextButton(
+          child: Text("Cancel"),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: Text("Download/Import"),
+          onPressed: () async {
+            if (_formState.currentState.validate()) {
+              _formState.currentState.save();
 
-                // download
-                await downloadTextFromURL(_urlInput).then((json) async {
-                  try {
-                    // parse patches
-                    int no1 = PatchManager.inst.countPatches();
-                    PatchManager.inst.addPatchesFromJson(json, online: true);
-                    int no2 = PatchManager.inst.countPatches();
-                    int count = no2 - no1;
+              // download
+              await downloadTextFromURL(_urlInput).then((json) async {
+                try {
+                  // parse patches
+                  int no1 = PatchManager.inst.countPatches();
+                  PatchManager.inst.addPatchesFromJson(json, online: true);
+                  int no2 = PatchManager.inst.countPatches();
+                  int count = no2 - no1;
 
-                    // show success
-                    await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text("Success"),
-                            content: Text("$count patches have been imported!"),
-                            actions: [
-                              TextButton(
-                                  child: Text("Dismiss"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  })
-                            ],
-                          );
-                        });
-                  } on Exception {
-                    // show error
-                    await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text("Error"),
-                            content: Text("Unable to parse from JSON :("),
-                            actions: [
-                              TextButton(
-                                  child: Text("Dismiss"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  })
-                            ],
-                          );
-                        });
-                  }
-                }, onError: (e) async {
-                  // show error
+                  // show success
                   await showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text("Error"),
-                          content: Text("Unable to download contents :("),
+                          title: Text("Success"),
+                          content: Text("$count patches have been imported!"),
                           actions: [
                             TextButton(
                                 child: Text("Dismiss"),
@@ -596,21 +530,55 @@ class _PatchDownloadViewState extends State<PatchDownloadView> {
                           ],
                         );
                       });
-                });
+                } on Exception {
+                  // show error
+                  await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Error"),
+                          content: Text("Unable to parse from JSON :("),
+                          actions: [
+                            TextButton(
+                                child: Text("Dismiss"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                })
+                          ],
+                        );
+                      });
+                }
+              }, onError: (e) async {
+                // show error
+                await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Error"),
+                        content: Text("Unable to download contents :("),
+                        actions: [
+                          TextButton(
+                              child: Text("Dismiss"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              })
+                        ],
+                      );
+                    });
+              });
 
-                Navigator.of(context).pop();
-              } else {
-                setState(() {
-                  // upon trying to add/write invalid data,
-                  // it'll be validated every time the fields change
-                  // until you save it.
-                  _autoValidateFields = AutovalidateMode.disabled;
-                });
-              }
-            },
-          ),
-        ],
-      ),
+              Navigator.of(context).pop();
+            } else {
+              setState(() {
+                // upon trying to add/write invalid data,
+                // it'll be validated every time the fields change
+                // until you save it.
+                _autoValidateFields = AutovalidateMode.disabled;
+              });
+            }
+          },
+        ),
+      ],
     );
   }
 
@@ -671,8 +639,8 @@ class _PatchAddCustomViewState extends State<PatchAddCustomView> {
       ),
       body: Form(
         key: _formState,
-        child: NoOverglow(
-          child: ListView(
+        child: SingleChildScrollView(
+          child: Column(
             children: <Widget>[
               ListTile(
                 leading: Icon(Icons.person),

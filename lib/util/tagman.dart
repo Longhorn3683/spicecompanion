@@ -15,7 +15,11 @@ class TagManager {
 
   Future<void> start() async {
     // don't subscribe if on unsupported platform
-    if (!Platform.isAndroid && !Platform.isIOS && !Platform.isOhos) {
+    if (!Platform.isAndroid &&
+            !Platform.isIOS &&
+            defaultTargetPlatform != TargetPlatform.ohos
+        //&& !Platform.isOhos
+        ) {
       print("NFC features unsupported.");
       return;
     }

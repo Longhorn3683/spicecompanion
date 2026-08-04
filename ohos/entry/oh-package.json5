@@ -7,6 +7,7 @@
   "license": "",
   "dependencies": {
     "path_provider_ohos": "file:../har/path_provider_ohos.har",
-    "shared_preferences_ohos": "file:../har/shared_preferences_ohos.har"
+    "shared_preferences_ohos": "file:../har/shared_preferences_ohos.har",
+    "share_plus": "file:../har/share_plus.har"
   }
 }
