@@ -5,10 +5,12 @@ A companion app to SpiceTools. This app allows for remotely
 controlling and managing a running instance with the API enabled and
 configured.
 
-Powered by Flutter 3.7.
+Powered by Flutter 3.7
 
 ## Features
 - Support various platforms
+- Game status overview
+- Quick Screenshot
 - Manage and insert cards
 - Scan cards using NFC
 - Virtual Keypad
@@ -16,7 +18,6 @@ Powered by Flutter 3.7.
 - Online patch list download
 - Tons of preset patches, ability to add custom ones
 - View/Override/Press Buttons/Analogs/Lights on the fly
-- Game status overview
 - Exit your games remotely
 - Dark mode
 

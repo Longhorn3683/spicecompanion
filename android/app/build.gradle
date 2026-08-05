@@ -40,7 +40,7 @@ android {
 
     defaultConfig {
         namespace "io.longhorn3683.spice"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

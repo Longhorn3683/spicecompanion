@@ -1,7 +1,7 @@
 {
   "app": {
-    "bundleName": "io.longhorn3683.spicecompanion",
-    "vendor": "example",
+    "bundleName": "io.longhorn3683.spice",
+    "vendor": "Longhorn3683",
     "versionCode": 1,
     "versionName": "1.0.0",
     "icon": "$media:app_icon",

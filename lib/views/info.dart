@@ -150,6 +150,29 @@ class _InfoViewState extends State<InfoView> {
         systemOverlayStyle: getSystemUiOverlayStyle(context),
         //toolbarHeight: toolbarHidden ? 0 : null,
         actions: [
+          IconButton(
+            icon: Icon(Icons.screenshot_monitor),
+            onPressed: () async {
+              var dir = await getApplicationDocumentsDirectory();
+              String name =
+                  'SpiceCapture_${DateTime.now().toString().replaceAll('-', '').replaceAll(':', '').replaceAll(' ', '').replaceAll('.', '')}';
+              var file = File("${dir.path}/$name.jpg");
+
+              ConnectionPool.inst.get().then((con) {
+                captureGetJPG(con, screen: 0, divide: 1, quality: 100)
+                    .then((capture) async {
+                  await file.writeAsBytes(capture.data.toList(growable: false),
+                      flush: true);
+                  await GallerySaver.saveImage(file.path);
+                  await Share.shareFiles(<String>[file.path],
+                      mimeTypes: <String>["image/jpeg"]);
+                }).whenComplete(() {
+                  file.deleteSync();
+                  con.free();
+                });
+              });
+            },
+          ),
           MenuAnchor(
             builder: (
               BuildContext context,
@@ -281,13 +304,13 @@ class _InfoViewState extends State<InfoView> {
               ),
               Divider(),
               MenuItemButton(
-                leadingIcon: Icon(Icons.power_settings_new),
-                child: Text(S.current.force_shutdown),
+                leadingIcon: Icon(Icons.restart_alt),
+                child: Text(S.current.restart),
                 onPressed: () => showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      content: Text(S.current.force_shutdown_prompt),
+                      content: Text(S.current.restart_prompt),
                       actions: <Widget>[
                         TextButton(
                           child: Text(S.current.cancel),
@@ -297,7 +320,7 @@ class _InfoViewState extends State<InfoView> {
                             child: Text(S.current.ok),
                             onPressed: () {
                               ConnectionPool.inst.get().then((con) {
-                                controlShutdown(con)
+                                controlReboot(con)
                                     .catchError((e) {})
                                     .whenComplete(() => con.free());
                               }, onError: (e) {});
@@ -309,13 +332,13 @@ class _InfoViewState extends State<InfoView> {
                 ),
               ),
               MenuItemButton(
-                leadingIcon: Icon(Icons.restart_alt),
-                child: Text(S.current.force_reboot),
+                leadingIcon: Icon(Icons.power_settings_new),
+                child: Text(S.current.shutdown),
                 onPressed: () => showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      content: Text(S.current.force_reboot_prompt),
+                      content: Text(S.current.shutdown_prompt),
                       actions: <Widget>[
                         TextButton(
                           child: Text(S.current.cancel),
@@ -325,7 +348,7 @@ class _InfoViewState extends State<InfoView> {
                             child: Text(S.current.ok),
                             onPressed: () {
                               ConnectionPool.inst.get().then((con) {
-                                controlReboot(con)
+                                controlShutdown(con)
                                     .catchError((e) {})
                                     .whenComplete(() => con.free());
                               }, onError: (e) {});

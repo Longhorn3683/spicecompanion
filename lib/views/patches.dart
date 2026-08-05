@@ -286,7 +286,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: Text(S.current.patch_online),
+        title: Text(S.current.patch_online_patches),
         content: SingleChildScrollView(
           child: Column(
             children: <Widget>[

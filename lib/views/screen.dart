@@ -132,22 +132,27 @@ class _ScreenViewState extends State<ScreenView> {
               },
             ),
             IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () {
+              icon: Icon(Icons.screenshot_monitor),
+              onPressed: () async {
+                var dir = await getApplicationDocumentsDirectory();
+                String name =
+                    'SpiceCapture_${DateTime.now().toString().replaceAll('-', '').replaceAll(':', '').replaceAll(' ', '').replaceAll('.', '')}';
+                var file = File("${dir.path}/$name.jpg");
+
                 ConnectionPool.inst.get().then((con) {
                   captureGetJPG(con,
-                          screen: screensCaptureNo, divide: 2, quality: 50)
+                          screen: screensCaptureNo, divide: 1, quality: 100)
                       .then((capture) async {
-                    var dir = await getApplicationDocumentsDirectory();
-                    var path = dir.path;
-                    var file = File("$path/capture.jpg");
                     await file.writeAsBytes(
                         capture.data.toList(growable: false),
                         flush: true);
-                    Share.shareFiles(<String>[file.path],
+                    await GallerySaver.saveImage(file.path);
+                    await Share.shareFiles(<String>[file.path],
                         mimeTypes: <String>["image/jpeg"]);
-                    setState(() {});
-                  }).whenComplete(() => con.free());
+                  }).whenComplete(() {
+                    file.deleteSync();
+                    con.free();
+                  });
                 });
               },
             ),

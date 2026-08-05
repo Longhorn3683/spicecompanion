@@ -32,6 +32,10 @@ dependencies:
   #vibration: ^1.7.3
   mutex: ^1.1.0
   desktop_window: ^0.3.0
+  gallery_saver:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_gallery_saver.git
+      ref: 2.3.2-ohos-1.0.0
 
 dependency_overrides:
   path_provider:

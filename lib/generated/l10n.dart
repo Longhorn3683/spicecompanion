@@ -455,41 +455,41 @@ class S {
     );
   }
 
-  /// `Force Shutdown`
-  String get force_shutdown {
+  /// `Restart`
+  String get restart {
     return Intl.message(
-      'Force Shutdown',
-      name: 'force_shutdown',
+      'Restart',
+      name: 'restart',
       desc: '',
       args: [],
     );
   }
 
-  /// `Force Shutdown?`
-  String get force_shutdown_prompt {
+  /// `Restart PC?`
+  String get restart_prompt {
     return Intl.message(
-      'Force Shutdown?',
-      name: 'force_shutdown_prompt',
+      'Restart PC?',
+      name: 'restart_prompt',
       desc: '',
       args: [],
     );
   }
 
-  /// `Force Reboot`
-  String get force_reboot {
+  /// `Shutdown`
+  String get shutdown {
     return Intl.message(
-      'Force Reboot',
-      name: 'force_reboot',
+      'Shutdown',
+      name: 'shutdown',
       desc: '',
       args: [],
     );
   }
 
-  /// `Force Reboot?`
-  String get force_reboot_prompt {
+  /// `Shutdown PC?`
+  String get shutdown_prompt {
     return Intl.message(
-      'Force Reboot?',
-      name: 'force_reboot_prompt',
+      'Shutdown PC?',
+      name: 'shutdown_prompt',
       desc: '',
       args: [],
     );
@@ -785,10 +785,10 @@ class S {
     );
   }
 
-  /// `Online Patches`
+  /// `Online`
   String get patch_online {
     return Intl.message(
-      'Online Patches',
+      'Online',
       name: 'patch_online',
       desc: '',
       args: [],
@@ -830,6 +830,16 @@ class S {
     return Intl.message(
       'Error applying patch.',
       name: 'patch_apply_error',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Online Patches`
+  String get patch_online_patches {
+    return Intl.message(
+      'Online Patches',
+      name: 'patch_online_patches',
       desc: '',
       args: [],
     );
