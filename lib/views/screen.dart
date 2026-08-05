@@ -122,7 +122,8 @@ class _ScreenViewState extends State<ScreenView> {
       physics: NeverScrollableScrollPhysics(),
       slivers: [
         SliverAppBar(
-          title: Text('Screen'),
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(getViewName(SpiceView.Screen)),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.refresh),
@@ -230,65 +231,71 @@ class _ScreenViewState extends State<ScreenView> {
           child: () {
             var image = captureImage;
             if (image != null) {
-              return Center(
-                child: AspectRatio(
-                  aspectRatio: image.width / image.height,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: () {
-                      RenderBox rb = context.findRenderObject() as RenderBox;
-                      Size rbSize = rb?.size ?? Size(1280, 720);
-                      var divide = Settings.screenDivide.toInt();
+              return Padding(
+                padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: image.width / image.height,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: () {
+                        RenderBox rb = context.findRenderObject() as RenderBox;
+                        Size rbSize = rb?.size ?? Size(1280, 720);
+                        var divide = Settings.screenDivide.toInt();
 
-                      // get padding
-                      double padX = 0;
-                      double padY = 0;
-                      double imageAspect = image.width / image.height;
-                      double boxAspect = rbSize.width / rbSize.height;
-                      if (imageAspect > boxAspect) {
-                        padY = rbSize.height - rbSize.width / imageAspect;
-                      }
-                      if (imageAspect < boxAspect) {
-                        padX = rbSize.width - imageAspect * rbSize.height;
-                      }
+                        // get padding
+                        double padX = 0;
+                        double padY = 0;
+                        double imageAspect = image.width / image.height;
+                        double boxAspect = rbSize.width / rbSize.height;
+                        if (imageAspect > boxAspect) {
+                          padY = rbSize.height - rbSize.width / imageAspect;
+                        }
+                        if (imageAspect < boxAspect) {
+                          padX = rbSize.width - imageAspect * rbSize.height;
+                        }
 
-                      // get scale
-                      double horScale = image.width / (rbSize.width - padX);
-                      double verScale = image.height / (rbSize.height - padY);
-                      horScale *= divide;
-                      verScale *= divide;
+                        // get scale
+                        double horScale = image.width / (rbSize.width - padX);
+                        double verScale = image.height / (rbSize.height - padY);
+                        horScale *= divide;
+                        verScale *= divide;
 
-                      return Listener(
-                        onPointerDown: (p) {
-                          var pos = Offset(p.position.dx - padX * 0.5,
-                              p.position.dy - padY * 0.5);
-                          var local = rb.globalToLocal(pos);
-                          int touchX = (local.dx * horScale).toInt();
-                          int touchY = (local.dy * verScale).toInt();
-                          updateTouch(p.pointer, touchX, touchY, true);
-                        },
-                        onPointerMove: (p) {
-                          var pos = Offset(p.position.dx - padX * 0.5,
-                              p.position.dy - padY * 0.5);
-                          var local = rb.globalToLocal(pos);
-                          int touchX = (local.dx * horScale).toInt();
-                          int touchY = (local.dy * verScale).toInt();
-                          updateTouch(p.pointer, touchX, touchY, true);
-                        },
-                        onPointerUp: (p) {
-                          updateTouch(p.pointer, 0, 0, false);
-                        },
-                        onPointerCancel: (p) {
-                          updateTouch(p.pointer, 0, 0, false);
-                        },
-                        child: image,
-                      );
-                    }(),
+                        return Listener(
+                          onPointerDown: (p) {
+                            var pos = Offset(p.position.dx - padX * 0.5,
+                                p.position.dy - padY * 0.5);
+                            var local = rb.globalToLocal(pos);
+                            int touchX = (local.dx * horScale).toInt();
+                            int touchY = (local.dy * verScale).toInt();
+                            updateTouch(p.pointer, touchX, touchY, true);
+                          },
+                          onPointerMove: (p) {
+                            var pos = Offset(p.position.dx - padX * 0.5,
+                                p.position.dy - padY * 0.5);
+                            var local = rb.globalToLocal(pos);
+                            int touchX = (local.dx * horScale).toInt();
+                            int touchY = (local.dy * verScale).toInt();
+                            updateTouch(p.pointer, touchX, touchY, true);
+                          },
+                          onPointerUp: (p) {
+                            updateTouch(p.pointer, 0, 0, false);
+                          },
+                          onPointerCancel: (p) {
+                            updateTouch(p.pointer, 0, 0, false);
+                          },
+                          child: image,
+                        );
+                      }(),
+                    ),
                   ),
                 ),
               );
             }
-            return Center(child: Text("Screen mirror not available :("));
+            return Padding(
+              padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+              child: Center(child: Text(S.current.no_screen)),
+            );
           }(),
         ),
       ],

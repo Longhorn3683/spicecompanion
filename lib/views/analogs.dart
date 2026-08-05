@@ -101,11 +101,12 @@ class _AnalogsViewState extends State<AnalogsView> {
         physics: NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
-            title: Text('Analogs'),
+            systemOverlayStyle: getSystemUiOverlayStyle(context),
+            title: Text(getViewName(SpiceView.Analogs)),
           ),
           SliverFillRemaining(
             child: Center(
-              child: Text('No analogs available :('),
+              child: Text(S.current.no_analogs),
             ),
           ),
         ],
@@ -115,7 +116,8 @@ class _AnalogsViewState extends State<AnalogsView> {
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
-          title: Text('Analogs'),
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(getViewName(SpiceView.Analogs)),
           actions: <Widget>[
             IconButton(
               icon: Icon(locked ? Icons.lock : Icons.lock_open),
@@ -174,6 +176,8 @@ class _AnalogsViewState extends State<AnalogsView> {
             );
           }).toList(),
         )),
+        SliverPadding(
+            padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
   }

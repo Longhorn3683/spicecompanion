@@ -76,11 +76,12 @@ class _CardManagerViewState extends State<CardManagerView> {
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
           leading: IconButton(
             icon: Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
-          title: Text('Cards'),
+          title: Text(getViewName(SpiceView.CardManager)),
           actions: <Widget>[
             // 'Add Card' Button
             IconButton(
@@ -106,14 +107,28 @@ class _CardManagerViewState extends State<CardManagerView> {
           sliver: SliverList(
             delegate: SliverChildListDelegate(cardList.map((CardInfo card) {
               return Card(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(24),
+                  ),
+                ),
+                color: card.active ? Colors.lightGreen : null,
                 clipBehavior: Clip.antiAlias,
                 child: ListTile(
                   contentPadding: EdgeInsets.only(left: 16, right: 8),
-                  title: Text(
-                    card.name + (card.active ? " (Active)" : ""),
-                    style: TextStyle(color: card.active ? Colors.green : null),
-                  ),
+                  title: Text(card.name +
+                      (card.active ? " (${S.current.active})" : "")),
                   subtitle: Text(card.id),
+                  onTap: () {
+                    setState(() {
+                      if (!card.active) {
+                        for (var i in cardList) i.active = false;
+                        card.active = true;
+                      } else
+                        card.active = false;
+                    });
+                    cardListSave();
+                  },
                   trailing: MenuAnchor(
                     builder: (
                       BuildContext context,
@@ -144,18 +159,18 @@ class _CardManagerViewState extends State<CardManagerView> {
                     menuChildren: [
                       MenuItemButton(
                         leadingIcon: Icon(Icons.send),
-                        child: Text('Insert to P1'),
+                        child: Text(S.current.insert_p1),
                         onPressed: () => _insertCard(0, card.id),
                       ),
                       MenuItemButton(
                         leadingIcon: Icon(Icons.send),
-                        child: Text('Insert to P2'),
+                        child: Text(S.current.insert_p2),
                         onPressed: () => _insertCard(1, card.id),
                       ),
                       Divider(),
                       MenuItemButton(
                           leadingIcon: Icon(Icons.edit),
-                          child: Text('Edit \'${card.name}\''),
+                          child: Text(S.current.edit),
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -175,26 +190,8 @@ class _CardManagerViewState extends State<CardManagerView> {
                             );
                           }),
                       MenuItemButton(
-                        leadingIcon: Icon(card.active
-                            ? Icons.indeterminate_check_box
-                            : Icons.check_box),
-                        child: Text(card.active
-                            ? "Remove active status"
-                            : "Set to active card"),
-                        onPressed: () {
-                          setState(() {
-                            if (!card.active) {
-                              for (var i in cardList) i.active = false;
-                              card.active = true;
-                            } else
-                              card.active = false;
-                          });
-                          cardListSave();
-                        },
-                      ),
-                      MenuItemButton(
                         leadingIcon: Icon(Icons.delete),
-                        child: Text('Remove'),
+                        child: Text(S.current.remove),
                         onPressed: () {
                           setState(() => cardList.remove(card));
                           cardListSave();
@@ -207,6 +204,8 @@ class _CardManagerViewState extends State<CardManagerView> {
             }).toList()),
           ),
         ),
+        SliverPadding(
+            padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
   }
@@ -215,7 +214,7 @@ class _CardManagerViewState extends State<CardManagerView> {
     ConnectionPool.inst.get().then((con) {
       // show info
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Inserting Card: $cardID"),
+        content: Text("${S.current.card_inserting}: $cardID"),
         backgroundColor: Colors.deepOrange,
         duration: insertGap,
       ));
@@ -227,7 +226,7 @@ class _CardManagerViewState extends State<CardManagerView> {
     }, onError: (err) {
       // show error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Please connect to a server first."),
+        content: Text(S.current.connect_a_server),
         backgroundColor: Colors.deepOrange,
         duration: insertGap,
       ));
@@ -304,21 +303,32 @@ class _CardEditViewState extends State<CardEditView> {
 
   @override
   Widget build(BuildContext context) {
+    Widget getNFCTip() {
+      if (Platform.isAndroid || Platform.isIOS) {
+        return Text(S.current.card_tap);
+      } else {
+        return SizedBox();
+      }
+    }
+
     return AlertDialog(
-      title: Text(widget.baseDetails == null ? 'Add Card' : 'Edit Card'),
+      title: Text(widget.baseDetails == null
+          ? S.current.card_add
+          : S.current.card_edit),
       content: Form(
         key: _formState,
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
+              getNFCTip(),
               ListTile(
                 //leading: Icon(Icons.account_circle),
                 title: TextFormField(
                   autocorrect: false,
                   initialValue: _data.name,
                   decoration: InputDecoration(
-                    labelText: "Name",
-                    hintText: "Main Card",
+                    labelText: S.current.name,
+                    hintText: S.current.card_main,
                   ),
                   onSaved: (String s) => _data.name = s,
                   validator: validateBasic,
@@ -331,7 +341,7 @@ class _CardEditViewState extends State<CardEditView> {
                   controller: cardIDController,
                   autocorrect: false,
                   decoration: InputDecoration(
-                    labelText: "Card ID",
+                    labelText: S.current.card_id,
                     hintText: "E0040123456789AB",
                   ),
                   keyboardType: TextInputType.text,
@@ -346,7 +356,7 @@ class _CardEditViewState extends State<CardEditView> {
                   controller: pubIDController,
                   autocorrect: false,
                   decoration: InputDecoration(
-                      labelText: "Public ID", hintText: "optional"),
+                      labelText: "Public ID", hintText: S.current.optional),
                   keyboardType: TextInputType.text,
                   validator: validatePublicID,
                   autovalidateMode: _autoValidateFields,
@@ -359,27 +369,24 @@ class _CardEditViewState extends State<CardEditView> {
                   initialValue: _data.idTrigger,
                   decoration: InputDecoration(
                     labelText: "Insert when scanning ID",
-                    hintText: "E004... (optional)",
+                    hintText: "E004... (${S.current.optional})",
                   ),
                   keyboardType: TextInputType.text,
                   onSaved: (String s) => _data.idTrigger = s.toUpperCase(),
                 ),
               ),
-              /*ListTile(
-                title: Text(""),
-                subtitle: Text("Tip: Tap your card to the back of your phone."),
-              ),*/
             ],
           ),
         ),
       ),
       actions: <Widget>[
         TextButton(
-          child: Text('Cancel'),
+          child: Text(S.current.cancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
+          child:
+              Text(widget.baseDetails == null ? S.current.add : S.current.save),
           onPressed: () {
             if (_formState.currentState.validate()) {
               _formState.currentState.save();

@@ -80,21 +80,23 @@ class _SettingsViewState extends State<SettingsView> {
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
-          title: Text('Settings'),
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(getViewName(SpiceView.Settings)),
         ),
         SliverList(
-            delegate: SliverChildListDelegate([
-          SwitchListTile(
-            secondary: Icon(Icons.dark_mode),
-            title: Text("Dark Mode"),
-            value: Settings.darkMode,
-            onChanged: (value) {
-              Settings.darkMode = value;
-              setState(() {});
-            },
-          ),
-          Divider(),
-          /*ListTile(
+          delegate: SliverChildListDelegate(
+            [
+              SwitchListTile(
+                secondary: Icon(Icons.dark_mode),
+                title: Text(S.current.dark_mode),
+                value: Settings.darkMode,
+                onChanged: (value) {
+                  Settings.darkMode = value;
+                  setState(() {});
+                },
+              ),
+              Divider(),
+              /*ListTile(
             title: Text("Button Vibration Duration: " +
                 Settings.buttonVibrationDuration.toInt().toString() +
                 "ms"),
@@ -110,70 +112,73 @@ class _SettingsViewState extends State<SettingsView> {
               },
             ),
           ),*/
-          ListTile(
-            title: Text("Screen Quality: " +
-                Settings.screenQuality.toInt().toString() +
-                "%"),
-            subtitle: Slider(
-              value: Settings.screenQuality,
-              min: 0,
-              max: 100,
-              divisions: 100,
-              onChanged: (value) {
-                print(
-                    "Settings: screen quality changed to " + value.toString());
-                Settings.screenQuality = value;
-                Settings.save();
-                setState(() {});
-              },
-            ),
+              ListTile(
+                title: Text("${S.current.screen_quality}: " +
+                    Settings.screenQuality.toInt().toString() +
+                    "%"),
+                subtitle: Slider(
+                  value: Settings.screenQuality,
+                  min: 0,
+                  max: 100,
+                  divisions: 100,
+                  onChanged: (value) {
+                    //print("Settings: screen quality changed to " + value.toString());
+                    Settings.screenQuality = value;
+                    Settings.save();
+                    setState(() {});
+                  },
+                ),
+              ),
+              ListTile(
+                title: Text("${S.current.screen_threads}: " +
+                    Settings.screenThreads.toInt().toString()),
+                subtitle: Slider(
+                  value: Settings.screenThreads,
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  onChanged: (value) {
+                    Settings.screenThreads = value;
+                    Settings.save();
+                    setState(() {});
+                  },
+                ),
+              ),
+              ListTile(
+                title: Text("${S.current.screen_divide}: " +
+                    Settings.screenDivide.toInt().toString()),
+                subtitle: Slider(
+                  value: Settings.screenDivide,
+                  min: 1,
+                  max: 16,
+                  divisions: 15,
+                  onChanged: (value) {
+                    Settings.screenDivide = value;
+                    Settings.save();
+                    setState(() {});
+                  },
+                ),
+              ),
+              Divider(),
+              ListTile(
+                title: Text(S.current.licenses),
+                onTap: () {
+                  showLicensePage(context: context);
+                },
+              ),
+              ListTile(
+                title: Text(S.current.about),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => AboutView()),
+                  );
+                },
+              ),
+            ],
           ),
-          ListTile(
-            title: Text(
-                "Screen Threads: " + Settings.screenThreads.toInt().toString()),
-            subtitle: Slider(
-              value: Settings.screenThreads,
-              min: 1,
-              max: 10,
-              divisions: 9,
-              onChanged: (value) {
-                Settings.screenThreads = value;
-                Settings.save();
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: Text(
-                "Screen Divide: " + Settings.screenDivide.toInt().toString()),
-            subtitle: Slider(
-              value: Settings.screenDivide,
-              min: 1,
-              max: 16,
-              divisions: 15,
-              onChanged: (value) {
-                Settings.screenDivide = value;
-                Settings.save();
-                setState(() {});
-              },
-            ),
-          ),
-          Divider(),
-          ListTile(
-            title: Text("Licenses"),
-            onTap: () {
-              showLicensePage(context: context);
-            },
-          ),
-          ListTile(
-            title: Text("About"),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => AboutView()),
-              );
-            },
-          ),
-        ]))
+        ),
+        SliverPadding(
+            padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
   }
@@ -205,7 +210,9 @@ class _AboutViewState extends State<AboutView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("About")),
+      appBar: AppBar(
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(S.current.about)),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: SingleChildScrollView(

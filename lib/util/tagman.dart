@@ -25,17 +25,14 @@ class TagManager {
     }
 
     // subscribe
-    /*FlutterNfcReader.read.listen((data) async {
-
+    FlutterNfcReader.read.listen((data) async {
       // get data
       String idData = data.id;
-      if (idData.startsWith("0x"))
-        idData = idData.substring(2);
+      if (idData.startsWith("0x")) idData = idData.substring(2);
 
       // check if valid hex
       if (idData.length % 2 == 0 &&
           RegExp(r"^([a-zA-Z0-9][a-zA-Z0-9])+$").hasMatch(idData)) {
-
         // upper case
         idData = idData.toUpperCase();
 
@@ -50,19 +47,16 @@ class TagManager {
         }
 
         // trim size if too big
-        if (id.length > 16)
-          id = id.substring(0, 16);
+        if (id.length > 16) id = id.substring(0, 16);
 
         // fill with zeroes
-        while (id.length < 16)
-          id += "0";
+        while (id.length < 16) id += "0";
 
         // check length
-        if (id.length == 16)
-          this.tagStream.add(id);
+        if (id.length == 16) this.tagStream.add(id);
       }
     }, onError: (e) {
       print("NFC features unavailable.");
-    });*/
+    });
   }
 }

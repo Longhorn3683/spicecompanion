@@ -6,6 +6,8 @@ String gameDest = "";
 String gameSpec = "";
 String gameRev = "";
 String gameExt = "";
+String _gameName = "";
+String _gameServer = "";
 Duration lastPing = Duration(seconds: 1);
 
 enum SpiceTheme { Light, Dark }
@@ -30,8 +32,6 @@ class _MainViewState extends State<MainView> {
   SpiceView _currentView;
   Widget _viewWidget;
 
-  String _gameName = "";
-  String _gameServer = "";
   Widget _gameAvatar;
   static Timer _gameTimer;
   static bool _gameTickActive = false;
@@ -106,8 +106,8 @@ class _MainViewState extends State<MainView> {
 
       // set title
       setState(() {
-        _gameName = "Disconnected";
-        _gameServer = "Please connect to a server.";
+        _gameName = S.current.disconnected;
+        _gameServer = S.current.connect_a_server;
         _gameAvatar = Image.asset("assets/spice.png");
       });
     });
@@ -118,6 +118,13 @@ class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        localizationsDelegates: [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
         theme: spiceThemes[currentTheme],
         home:
             StatefulBuilder(builder: (BuildContext context, StateSetter state) {
@@ -142,15 +149,20 @@ class _MainViewState extends State<MainView> {
                 });
               },
               children: <Widget>[
-                /*UserAccountsDrawerHeader(
-                    accountName: Text(_gameName),
-                    accountEmail: Text(_gameServer),
-                    //currentAccountPicture: _gameAvatar,
-                  ),*/
+                ListTile(
+                  title: Text(_gameServer),
+                  subtitle: Text(_gameName),
+                  onTap: () => showModalBottomSheet(
+                      context: context,
+                      clipBehavior: Clip.antiAlias,
+                      builder: (context) => ServerView()),
+                ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.info),
                   label: Text(getViewName(SpiceView.Info)),
                 ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.credit_card),
                   label: Text(getViewName(SpiceView.CardManager)),
@@ -160,6 +172,7 @@ class _MainViewState extends State<MainView> {
                   icon: Icon(Icons.dialpad),
                   label: Text(getViewName(SpiceView.Keypad)),
                 ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.memory),
                   label: Text(getViewName(SpiceView.Patches)),
@@ -169,18 +182,22 @@ class _MainViewState extends State<MainView> {
                   icon: Icon(Icons.cast),
                   label: Text(getViewName(SpiceView.Screen)),
                 ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.gamepad),
                   label: Text(getViewName(SpiceView.Controller)),
                 ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.keyboard),
                   label: Text(getViewName(SpiceView.Buttons)),
                 ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.threesixty),
                   label: Text(getViewName(SpiceView.Analogs)),
                 ),
+                SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: Icon(Icons.lightbulb_outline),
                   label: Text(getViewName(SpiceView.Lights)),
@@ -200,5 +217,25 @@ class _MainViewState extends State<MainView> {
     if (_currentView == view) return;
     _currentView = view;
     _viewWidget = getView(_currentView);
+  }
+}
+
+SystemUiOverlayStyle getSystemUiOverlayStyle(BuildContext context) {
+  return SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness:
+        isDarkMode(context) ? Brightness.light : Brightness.dark,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness:
+        isDarkMode(context) ? Brightness.light : Brightness.dark,
+    systemNavigationBarContrastEnforced: false,
+  );
+}
+
+bool isDarkMode(BuildContext context) {
+  if (Theme.of(context).brightness == Brightness.dark) {
+    return true;
+  } else {
+    return false;
   }
 }

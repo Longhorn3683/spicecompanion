@@ -91,7 +91,8 @@ class _ServerViewState extends State<ServerView> {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          title: Text('Servers'),
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(S.current.servers),
           backgroundColor: Colors.transparent,
           actions: <Widget>[
             // 'Add Server' Button
@@ -113,45 +114,105 @@ class _ServerViewState extends State<ServerView> {
             ),
           ],
         ),
-        SliverList(
-          delegate: SliverChildListDelegate(
-            serverList.map((ServerInfo s) {
-              var isCon =
-                  ConnectionPool.inst.isActive(s.address, s.port, s.pass);
-              var isConStr = isCon ? " (Active)" : "";
-              if (isCon && !hasConnection) isConStr = " (Disconnected)";
-              return ListTile(
-                title: Text(
-                  "${s.name}$isConStr",
-                  style: !isCon
+        SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate(
+              serverList.map((ServerInfo s) {
+                var isCon =
+                    ConnectionPool.inst.isActive(s.address, s.port, s.pass);
+                var isConStr = isCon ? " (${S.current.active})" : "";
+                if (isCon && !hasConnection)
+                  isConStr = " (${S.current.disconnected})";
+                return Card(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(24),
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  color: !isCon
                       ? null
-                      : TextStyle(
-                          color: hasConnection
-                              ? Colors.lightGreen
-                              : Colors.orange),
-                ),
-                subtitle: Text('${s.address}:${s.port}'),
-                onTap: () {
-                  // check for connect/disconnect
-                  if (!isCon)
-                    _tryConnect(s);
-                  else {
-                    // show disconnect info
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      : hasConnection
+                          ? Colors.lightGreen
+                          : Colors.orange,
+                  child: ListTile(
+                    title: Text("${s.name}$isConStr"),
+                    subtitle: Text('${s.address}:${s.port}'),
+                    onTap: () {
+                      // check for connect/disconnect
+                      if (!isCon)
+                        _tryConnect(s);
+                      else {
+                        // show disconnect info
+                        /*ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text("Disconnected."),
                       backgroundColor: Colors.orange,
                       duration: Duration(milliseconds: 500),
-                    ));
+                    ));*/
 
-                    ConnectionPool.inst.disconnect();
-                    setState(() {});
-                  }
-                },
-                onLongPress: () => _showOptions(s),
-              );
-            }).toList(),
+                        ConnectionPool.inst.disconnect();
+                        setState(() {});
+                      }
+                    },
+                    trailing: MenuAnchor(
+                      builder: (
+                        BuildContext context,
+                        MenuController controller,
+                        Widget child,
+                      ) {
+                        return IconButton(
+                          icon: Icon(Icons.more_vert),
+                          onPressed: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                        );
+                      },
+                      menuChildren: [
+                        MenuItemButton(
+                            leadingIcon: Icon(Icons.edit),
+                            child: Text(S.current.edit),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return ServerEditView(
+                                    baseDetails: s,
+                                    onSave: (ServerInfo newServer) {
+                                      setState(() {
+                                        s.name = newServer.name;
+                                        s.address = newServer.address;
+                                        s.port = newServer.port;
+                                        s.pass = newServer.pass;
+                                      });
+                                      saveServerList();
+                                    },
+                                  );
+                                },
+                              );
+                            }),
+                        MenuItemButton(
+                          leadingIcon: Icon(Icons.delete),
+                          child: Text(S.current.remove),
+                          onPressed: () {
+                            setState(() => serverList.remove(s));
+                            saveServerList();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ),
+        SliverPadding(
+            padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
   }
@@ -174,11 +235,11 @@ class _ServerViewState extends State<ServerView> {
       connection = con;
 
       // show info
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      /*ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Connected to ${server.address}:${server.port}"),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 1),
-      ));
+      ));*/
 
       // query avs info to test
       return infoAVS(con);
@@ -188,14 +249,29 @@ class _ServerViewState extends State<ServerView> {
       // show error
       var text = "";
       if (err is APIError)
-        text = "Failed to connect: Wrong password?";
+        text = S.current.connect_failed_password;
       else
-        text = "Failed to connect to ${server.address}:${server.port}";
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        text =
+            "${S.current.connect_failed_to} ${server.address}:${server.port}";
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text(text),
+            actions: <Widget>[
+              TextButton(
+                child: Text(S.current.ok),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          );
+        },
+      );
+      /*ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(text),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 1),
-      ));
+      ));*/
     }).then((avs) {
       if (connection != null) connection.free();
     }, onError: (err) {
@@ -212,54 +288,7 @@ class _ServerViewState extends State<ServerView> {
     showDialog(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
-        children: <Widget>[
-          SimpleDialogOption(
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.edit),
-                  Container(
-                    margin: EdgeInsets.only(left: 5),
-                    child: Text('Edit \'${server.name}\''),
-                  ),
-                ],
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return ServerEditView(
-                      baseDetails: server,
-                      onSave: (ServerInfo newServer) {
-                        setState(() {
-                          server.name = newServer.name;
-                          server.address = newServer.address;
-                          server.port = newServer.port;
-                          server.pass = newServer.pass;
-                        });
-                        saveServerList();
-                      },
-                    );
-                  },
-                );
-              }),
-          SimpleDialogOption(
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.delete),
-                Container(
-                  margin: EdgeInsets.only(left: 5),
-                  child: Text('Remove'),
-                ),
-              ],
-            ),
-            onPressed: () {
-              setState(() => serverList.remove(server));
-              saveServerList();
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
+        children: <Widget>[],
       ),
     );
   }
@@ -297,7 +326,9 @@ class _ServerEditViewState extends State<ServerEditView> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.baseDetails == null ? 'Add Server' : 'Edit Server'),
+      title: Text(widget.baseDetails == null
+          ? S.current.server_add
+          : S.current.server_edit),
       content: Form(
         key: _formState,
         child: SingleChildScrollView(
@@ -309,8 +340,8 @@ class _ServerEditViewState extends State<ServerEditView> {
                   autocorrect: false,
                   initialValue: _data.name,
                   decoration: InputDecoration(
-                    labelText: 'Name',
-                    hintText: 'Main Computer',
+                    labelText: S.current.name,
+                    hintText: S.current.main_computer,
                   ),
                   onSaved: (String s) => _data.name = s,
                   validator: validateBasic,
@@ -323,7 +354,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                   autocorrect: false,
                   initialValue: _data.address,
                   decoration: InputDecoration(
-                    labelText: 'Host Address',
+                    labelText: S.current.host_address,
                     hintText: '127.0.0.1',
                   ),
                   keyboardType: TextInputType.url,
@@ -338,7 +369,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                   autocorrect: false,
                   initialValue: _data.port,
                   decoration: InputDecoration(
-                    labelText: 'Port',
+                    labelText: S.current.port,
                     hintText: '1337',
                   ),
                   keyboardType: TextInputType.number,
@@ -346,8 +377,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                   validator: (String s) {
                     var basic = validateBasic(s);
                     if (basic != null) return basic;
-                    if (int.tryParse(s) == null)
-                      return 'Must be a valid integer!';
+                    if (int.tryParse(s) == null) return S.current.vaild_int;
                     return null;
                   },
                   autovalidateMode: _autoValidateFields,
@@ -359,7 +389,7 @@ class _ServerEditViewState extends State<ServerEditView> {
                   autocorrect: false,
                   initialValue: _data.pass,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: S.current.password,
                     hintText: 'changeme (optional)',
                   ),
                   obscureText: true,
@@ -374,11 +404,12 @@ class _ServerEditViewState extends State<ServerEditView> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text('Cancel'),
+          child: Text(S.current.cancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: Text(widget.baseDetails == null ? 'Add' : 'Save'),
+          child:
+              Text(widget.baseDetails == null ? S.current.add : S.current.save),
           onPressed: () {
             if (_formState.currentState.validate()) {
               _formState.currentState.save();
@@ -399,7 +430,7 @@ class _ServerEditViewState extends State<ServerEditView> {
   }
 
   String validateBasic(String s) {
-    if (s.length == 0) return "Can't be empty!";
+    if (s.length == 0) return S.current.cannot_be_empty;
     return null;
   }
 }

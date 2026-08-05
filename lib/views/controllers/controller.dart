@@ -98,10 +98,9 @@ class _ControllerViewState extends State<ControllerView> {
             }
           default:
             if (gameModel == null || gameModel == "")
-              subView = Text("Please connect to a server first.");
+              subView = Text(S.current.connect_a_server);
             else
-              subView =
-                  Text("This game does not yet have a controller view :(");
+              subView = Text(S.current.no_controller_view);
             break;
         }
 
@@ -110,7 +109,8 @@ class _ControllerViewState extends State<ControllerView> {
           physics: NeverScrollableScrollPhysics(),
           slivers: [
             SliverAppBar(
-              title: Text('Controller'),
+              systemOverlayStyle: getSystemUiOverlayStyle(context),
+              title: Text(getViewName(SpiceView.Controller)),
               actions: <Widget>[
                 IconButton(
                   icon: Icon(Icons.autorenew),
@@ -122,7 +122,9 @@ class _ControllerViewState extends State<ControllerView> {
               ],
             ),
             SliverFillRemaining(
-              child: Center(child: subView),
+              child: Padding(
+                  padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                  child: Center(child: subView)),
             ),
           ],
         );

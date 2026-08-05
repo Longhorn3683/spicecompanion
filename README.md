@@ -1,28 +1,29 @@
 This is a fork of [SpiceCompanion](https://github.com/LupinThidr/spicecompanion) project.
 
-# SpiceCompanion
-The official companion app to SpiceTools. This app allows for remotely
+# Spice L3
+A companion app to SpiceTools. This app allows for remotely
 controlling and managing a running instance with the API enabled and
 configured.
 
+Powered by Flutter 3.7.
+
 ## Features
+- Support various platforms
 - Manage and insert cards
 - Scan cards using NFC
-- Virtual Keypad/Scanner
+- Virtual Keypad
 - Live Patches: Enable/Disable hex edits on the fly
 - Online patch list download
 - Tons of preset patches, ability to add custom ones
 - View/Override/Press Buttons/Analogs/Lights on the fly
 - Game status overview
 - Exit your games remotely
-- Dark mode (optional)
+- Dark mode
 
 ## Requirements
 - SpiceTools
 - Android 4.4+
 - NFC (optional)
-
-A port to iOS is possible and being considered.
 
 ## How to use with SpiceTools
 In your batch file setup to for usage with SpiceTools, enable the `-api` and

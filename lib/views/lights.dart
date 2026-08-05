@@ -100,11 +100,12 @@ class _LightsViewState extends State<LightsView> {
         physics: NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
-            title: Text('Lights'),
+            systemOverlayStyle: getSystemUiOverlayStyle(context),
+            title: Text(getViewName(SpiceView.Lights)),
           ),
           SliverFillRemaining(
             child: Center(
-              child: Text('No lights available :('),
+              child: Text(S.current.no_lights),
             ),
           ),
         ],
@@ -114,7 +115,8 @@ class _LightsViewState extends State<LightsView> {
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
-          title: Text('Lights'),
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(getViewName(SpiceView.Lights)),
           actions: <Widget>[
             IconButton(
               icon: Icon(locked ? Icons.lock : Icons.lock_open),
@@ -173,6 +175,8 @@ class _LightsViewState extends State<LightsView> {
             );
           }).toList(),
         )),
+        SliverPadding(
+            padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:spicecompanion/views/views.dart';
 import 'package:spicecompanion/util/util.dart';
 
@@ -17,7 +18,6 @@ void _setTargetPlatformForDesktop() {
   if (targetPlatform != null) {
     debugDefaultTargetPlatformOverride = targetPlatform;
   }
-  print("Target platform override: " + targetPlatform.toString());
 }
 
 void main() async {
@@ -25,6 +25,7 @@ void main() async {
     _setTargetPlatformForDesktop();
   } catch (e) {}
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // load settings
   await Settings.load();

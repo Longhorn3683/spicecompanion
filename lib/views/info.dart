@@ -9,12 +9,13 @@ class _InfoViewState extends State<InfoView> {
   Timer updateTimer;
   bool updateLock = false;
 
-  String _disconnectMsg = "Disconnected.";
+  String _disconnectMsg = S.current.disconnected;
   String _avsModel = '';
   String _avsDest = '';
   String _avsSpec = '';
   String _avsRev = '';
   String _avsExt = '';
+  String _avsTitle = '';
   String _avsServices = '';
 
   String _launcherVersion = '';
@@ -30,6 +31,10 @@ class _InfoViewState extends State<InfoView> {
   num _vmemTotalUsed = 0;
   num _vmemUsed = 0;
 
+  int currentMode = 0;
+
+  StreamSubscription<String> cardSubscription;
+
   _InfoViewState() {
     if (updateTimer != null) updateTimer.cancel();
     updateTimer = Timer.periodic(
@@ -43,8 +48,19 @@ class _InfoViewState extends State<InfoView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    // subscribe to tag input
+    this.cardSubscription = TagManager.inst.tagStream.stream.listen((id) {
+      insertCardID(id);
+    });
+  }
+
+  @override
   void dispose() {
     if (updateTimer != null) updateTimer.cancel();
+    if (this.cardSubscription != null) this.cardSubscription.cancel();
     super.dispose();
   }
 
@@ -62,12 +78,18 @@ class _InfoViewState extends State<InfoView> {
         return infoMemory(con);
       }).then((memory) {
         if (mounted) {
+          //var tDiff = lastPing.inMilliseconds;
           setState(() {
+            //_gameName = "$gameModel:$gameDest:$gameSpec:$gameRev:$gameExt";
+            //_gameServer = "${con.host}:${con.port}@${tDiff}ms";
             _avsModel = respAVS['model'] ?? "";
             _avsDest = respAVS['dest'] ?? "";
             _avsSpec = respAVS['spec'] ?? "";
             _avsRev = respAVS['rev'] ?? "";
             _avsExt = respAVS['ext'] ?? "";
+            _avsTitle =
+                '${respAVS['model']}:${respAVS['dest']}:${respAVS['spec']}:${respAVS['rev']}:${respAVS['ext']}' ??
+                    "";
             _avsServices = respAVS['services'] ?? "";
 
             _launcherVersion = respLauncher['version'] ?? "";
@@ -102,6 +124,7 @@ class _InfoViewState extends State<InfoView> {
         _avsSpec = _disconnectMsg;
         _avsRev = _disconnectMsg;
         _avsExt = _disconnectMsg;
+        _avsTitle = _disconnectMsg;
         _avsServices = _disconnectMsg;
         _launcherVersion = _disconnectMsg;
         _launcherCompileDate = null;
@@ -124,6 +147,7 @@ class _InfoViewState extends State<InfoView> {
   Widget build(BuildContext context) {
     return CustomScrollView(slivers: [
       SliverAppBar(
+        systemOverlayStyle: getSystemUiOverlayStyle(context),
         //toolbarHeight: toolbarHidden ? 0 : null,
         actions: [
           MenuAnchor(
@@ -133,7 +157,7 @@ class _InfoViewState extends State<InfoView> {
               Widget child,
             ) {
               return IconButton(
-                icon: const Icon(Icons.more_vert),
+                icon: const Icon(Icons.monetization_on),
                 onPressed: () {
                   if (controller.isOpen) {
                     controller.close();
@@ -144,35 +168,31 @@ class _InfoViewState extends State<InfoView> {
               );
             },
             menuChildren: [
-              SubmenuButton(
-                leadingIcon: Icon(Icons.monetization_on),
-                child: Text('Insert Coin'),
-                menuChildren: [
-                  MenuItemButton(
-                    child: Text('1 Coin'),
-                    onPressed: () => ConnectionPool.inst.get().then((con) {
-                      coinInsert(con, 1).whenComplete(() {
-                        con.free();
-                      });
-                    }, onError: (e) {}),
-                  ),
-                  MenuItemButton(
-                    child: Text('5 Coins'),
-                    onPressed: () => ConnectionPool.inst.get().then((con) {
-                      coinInsert(con, 5).whenComplete(() {
-                        con.free();
-                      });
-                    }, onError: (e) {}),
-                  ),
-                  MenuItemButton(
-                    child: Text('10 Coins'),
-                    onPressed: () => ConnectionPool.inst.get().then((con) {
-                      coinInsert(con, 10).whenComplete(() {
-                        con.free();
-                      });
-                    }, onError: (e) {}),
-                  ),
-                  /*MenuItemButton(
+              MenuItemButton(
+                child: Text(S.current.insert_coin_1),
+                onPressed: () => ConnectionPool.inst.get().then((con) {
+                  coinInsert(con, 1).whenComplete(() {
+                    con.free();
+                  });
+                }, onError: (e) {}),
+              ),
+              MenuItemButton(
+                child: Text(S.current.insert_coin_5),
+                onPressed: () => ConnectionPool.inst.get().then((con) {
+                  coinInsert(con, 5).whenComplete(() {
+                    con.free();
+                  });
+                }, onError: (e) {}),
+              ),
+              MenuItemButton(
+                child: Text(S.current.insert_coin_10),
+                onPressed: () => ConnectionPool.inst.get().then((con) {
+                  coinInsert(con, 10).whenComplete(() {
+                    con.free();
+                  });
+                }, onError: (e) {}),
+              ),
+              /*MenuItemButton(
                             child: Text('Custom'),
                             onPressed: () =>
                                 ConnectionPool.inst.get().then((con) {
@@ -182,127 +202,139 @@ class _InfoViewState extends State<InfoView> {
                               con.free();
                             }, onError: (e) {}),
                           ),*/
-                ],
+            ],
+          ),
+          MenuAnchor(
+            builder: (
+              BuildContext context,
+              MenuController controller,
+              Widget child,
+            ) {
+              return IconButton(
+                icon: const Icon(Icons.power_settings_new),
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+              );
+            },
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: Icon(Icons.restart_alt),
+                child: Text(S.current.restart_game),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text(S.current.restart_game_prompt),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text(S.current.cancel),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                            child: Text(S.current.ok),
+                            onPressed: () {
+                              ConnectionPool.inst.get().then((con) {
+                                controlRestart(con)
+                                    .catchError((e) {})
+                                    .whenComplete(() => con.free());
+                              }, onError: (e) {});
+                              Navigator.pop(context);
+                            }),
+                      ],
+                    );
+                  },
+                ),
               ),
-              SubmenuButton(
+              MenuItemButton(
+                leadingIcon: Icon(Icons.close),
+                child: Text(S.current.kill_game),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text(S.current.kill_game_prompt),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text(S.current.cancel),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          child: Text(S.current.ok),
+                          onPressed: () {
+                            ConnectionPool.inst.get().then((con) {
+                              controlExit(con, 0)
+                                  .catchError((e) {})
+                                  .whenComplete(() => con.free());
+                            }, onError: (e) {});
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              Divider(),
+              MenuItemButton(
                 leadingIcon: Icon(Icons.power_settings_new),
-                child: Text('Game Menu'),
-                menuChildren: [
-                  MenuItemButton(
-                    leadingIcon: Icon(Icons.restart_alt),
-                    child: Text("Restart Game"),
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          content: Text('Restart Game?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                                child: Text('OK'),
-                                onPressed: () {
-                                  ConnectionPool.inst.get().then((con) {
-                                    controlRestart(con)
-                                        .catchError((e) {})
-                                        .whenComplete(() => con.free());
-                                  }, onError: (e) {});
-                                  Navigator.pop(context);
-                                }),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  MenuItemButton(
-                    leadingIcon: Icon(Icons.close),
-                    child: Text("Kill Game"),
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          content: Text('Kill Game?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                              child: Text('OK'),
-                              onPressed: () {
-                                ConnectionPool.inst.get().then((con) {
-                                  controlExit(con, 0)
-                                      .catchError((e) {})
-                                      .whenComplete(() => con.free());
-                                }, onError: (e) {});
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  Divider(),
-                  MenuItemButton(
-                    leadingIcon: Icon(Icons.power_settings_new),
-                    child: Text("Force Shutdown"),
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          content: Text('Force Shutdown?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                                child: Text('OK'),
-                                onPressed: () {
-                                  ConnectionPool.inst.get().then((con) {
-                                    controlShutdown(con)
-                                        .catchError((e) {})
-                                        .whenComplete(() => con.free());
-                                  }, onError: (e) {});
-                                  Navigator.pop(context);
-                                }),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  MenuItemButton(
-                    leadingIcon: Icon(Icons.restart_alt),
-                    child: Text("Force Reboot"),
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          content: Text('Force Reboot?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                                child: Text('OK'),
-                                onPressed: () {
-                                  ConnectionPool.inst.get().then((con) {
-                                    controlReboot(con)
-                                        .catchError((e) {})
-                                        .whenComplete(() => con.free());
-                                  }, onError: (e) {});
-                                  Navigator.pop(context);
-                                }),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                child: Text(S.current.force_shutdown),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text(S.current.force_shutdown_prompt),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text(S.current.cancel),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                            child: Text(S.current.ok),
+                            onPressed: () {
+                              ConnectionPool.inst.get().then((con) {
+                                controlShutdown(con)
+                                    .catchError((e) {})
+                                    .whenComplete(() => con.free());
+                              }, onError: (e) {});
+                              Navigator.pop(context);
+                            }),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              MenuItemButton(
+                leadingIcon: Icon(Icons.restart_alt),
+                child: Text(S.current.force_reboot),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text(S.current.force_reboot_prompt),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text(S.current.cancel),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                            child: Text(S.current.ok),
+                            onPressed: () {
+                              ConnectionPool.inst.get().then((con) {
+                                controlReboot(con)
+                                    .catchError((e) {})
+                                    .whenComplete(() => con.free());
+                              }, onError: (e) {});
+                              Navigator.pop(context);
+                            }),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -322,65 +354,225 @@ class _InfoViewState extends State<InfoView> {
         ],
         pinned: true,
       ),
-      SliverList(
-        delegate: SliverChildListDelegate(
-          [
-            ListTile(
-              title: Text('server list'),
-              onTap: () {
-                showModalBottomSheet(
-                    context: context,
-                    clipBehavior: Clip.antiAlias,
-                    builder: (context) => ServerView());
-              }, // blank onTap adds the interact splash like in android settings's info
-            ),
-            // AVS
-            _createDisplay('Model', _avsModel),
-            _createDisplay('Destination', _avsDest),
-            _createDisplay('Specification', _avsSpec),
-            _createDisplay('Revision', _avsRev),
-            _createDisplay('Extension', _avsExt),
-            _createDisplay('Services', _avsServices),
+      SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        sliver: SliverList(
+          delegate: SliverChildListDelegate(
+            [
+              StatefulBuilder(
+                builder: (context, cardState) {
+                  //cardRefresh = () => cardState(() {});
 
-            Divider(),
+                  void nextMode() {
+                    currentMode = (currentMode + 1) % 2;
+                    if (getPlayerCount(gameModel) <= 1) currentMode = 0;
+                    cardState(() {});
+                  }
 
-            // Launcher Info
-            _createDisplay('Version', _launcherVersion),
-            _createDisplay(
-                'Compile Time',
-                _launcherCompileDate != null
-                    ? _getDateTimeFromGCC(
-                        _launcherCompileDate, _launcherCompileTime)
-                    : _disconnectMsg),
-            _createDisplay(
-                'System Time',
-                _launcherSystemTime != null
-                    ? _formatSystemTime(_launcherSystemTime.toLocal())
-                    : _disconnectMsg),
-            ListTile(
-                title: Text('Launch Args (${_launcherArgs.length - 1})'),
-                onTap: () => Navigator.push(context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return Scaffold(
-                          appBar: AppBar(
-                            title: Text('Launch Args'),
+                  return Theme(
+                    data: spiceThemes[SpiceTheme.Dark],
+                    child: Card(
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(24),
+                        ),
+                      ),
+                      color: getModeColor(),
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          trailing: IconButton(
+                            icon: Text(
+                              'P${currentMode + 1}',
+                              style: TextStyle(fontSize: 24),
+                            ),
+                            onPressed: () {
+                              nextMode();
+                            },
                           ),
-                          body: ListView(
-                            children: _getArgList(_launcherArgs),
-                          ));
-                    }))),
+                          title: Text(S.current.swipe_card),
+                          subtitle: Text(S.current.or_select_in_cards),
+                          onTap: () async {
+                            // check if cards are loaded
+                            if (!cardListLoaded) await cardListLoad();
 
-            Divider(),
+                            // check if cards are defined
+                            if (cardList.length == 0) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(S.current.add_cards_first),
+                                backgroundColor: Colors.red,
+                                duration: Duration(milliseconds: 500),
+                              ));
+                              return;
+                            }
 
-            // Memory Usage
-            _createMemoryDisplay(
-                'Memory Usage', _memUsed, _memTotalUsed, _memTotal),
-            _createMemoryDisplay(
-                'Virtual Memory', _vmemUsed, _vmemTotalUsed, _vmemTotal),
-          ],
+                            // check if we only have one card
+                            var card;
+                            if (cardList.length == 1) {
+                              // just use that one then
+                              card = cardList[0];
+                            } else if (cardList.any((i) => i.active)) {
+                              // use the active card
+                              card = cardList.firstWhere((i) => i.active);
+                            } else {
+                              // show card selection dialog
+                              card = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SimpleDialog(
+                                      clipBehavior: Clip.antiAlias,
+                                      title: Text(S.current.card_select),
+                                      children: cardList.map((CardInfo card) {
+                                        return SimpleDialogOption(
+                                          child:
+                                              Text("${card.name} (${card.id})"),
+                                          onPressed: () {
+                                            Navigator.pop(context, card);
+                                          },
+                                        );
+                                      }).toList(),
+                                    );
+                                  });
+                            }
+
+                            // check result
+                            if (card != null && card is CardInfo) {
+                              // move card to index 0 since we want the last used cards at the top
+                              cardList.remove(card);
+                              cardList.insert(0, card);
+                              cardListSave();
+
+                              // insert
+                              insertCardID(card.id);
+                            }
+                          }),
+                    ),
+                  );
+                },
+              ),
+
+              SizedBox(height: 4),
+
+              // AVS
+              Card(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(24),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  title: Text(_gameServer),
+                  subtitle: Text('$_avsTitle\n$_avsServices'),
+                  onTap: () => showModalBottomSheet(
+                      context: context,
+                      clipBehavior: Clip.antiAlias,
+                      builder: (context) => ServerView()),
+                ),
+              ),
+
+              SizedBox(height: 4),
+
+              // Memory Usage
+              Row(
+                children: [
+                  Expanded(
+                    child: _createMemoryDisplay(
+                        'RAM', _memUsed, _memTotalUsed, _memTotal),
+                  ),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: _createMemoryDisplay(
+                        'Swap', _vmemUsed, _vmemTotalUsed, _vmemTotal),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 4),
+
+              // Launcher Info
+              _createCard('spice2x',
+                  '${_launcherVersion}\n${_launcherCompileDate != null ? _getDateTimeFromGCC(_launcherCompileDate, _launcherCompileTime) : _disconnectMsg}'),
+
+              SizedBox(height: 4),
+
+              _createCard(
+                  S.current.system_time,
+                  _launcherSystemTime != null
+                      ? _formatSystemTime(_launcherSystemTime.toLocal())
+                      : _disconnectMsg),
+
+              SizedBox(height: 4),
+
+              Card(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(24),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      title: Text(
+                          '${S.current.launch_args} (${_launcherArgs.length - 1})'),
+                    ),
+                    ListView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      physics: NeverScrollableScrollPhysics(),
+                      children: _getArgList(_launcherArgs),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 4 + kBottomNavigationBarHeight),
+            ],
+          ),
         ),
-      ),
+      )
     ]);
+  }
+
+  Color getModeColor() {
+    switch (currentMode) {
+      case 0:
+        return Colors.teal;
+      case 1:
+        return Colors.purple;
+      default:
+        return Colors.black;
+    }
+  }
+
+  void insertCardID(String id) {
+    // get connection
+    ConnectionPool.inst.get().then((con) {
+      // show info
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("${S.current.card_inserting}: $id"),
+        backgroundColor: getModeColor(),
+        duration: Duration(seconds: 1),
+      ));
+
+      // insert card
+      cardInsert(con, currentMode, id).whenComplete(() {
+        con.free();
+      });
+    }, onError: (err) {
+      // show error
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.current.connect_a_server),
+        backgroundColor: Colors.deepOrange,
+        duration: Duration(seconds: 1),
+      ));
+    });
   }
 }
 
@@ -396,8 +588,8 @@ String _getDateTimeFromGCC(String date, String time) {
 
 // currently skips arg0 and provides a description for the rest from ./info_args (and a default for arg1)
 // title is the argument followed by any additional associated parameters, subtitle is the description
-List<ListTile> _getArgList(List<String> args) {
-  List<ListTile> list = [];
+List<Widget> _getArgList(List<String> args) {
+  List<Widget> list = [];
   for (int i = 1; i < args.length; i++) {
     String option = args[i], desc = '';
     bool skipNext = false;
@@ -416,18 +608,30 @@ List<ListTile> _getArgList(List<String> args) {
         desc = 'Game Binary';
     }
 
-    list.add(_createDisplay(option, desc));
+    list.add(
+      ListTile(
+        title: Text(option),
+        subtitle: Text(desc),
+      ),
+    );
     if (skipNext) i++;
   }
   return list;
 }
 
-Widget _createDisplay(String title, String desc) {
-  return ListTile(
-    title: Text(title),
-    subtitle: Text(desc),
-    onTap:
-        () {}, // blank onTap adds the interact splash like in android settings's info
+Widget _createCard(String title, String desc) {
+  return Card(
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(24),
+      ),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      title: Text(title),
+      subtitle: Text(desc),
+    ),
   );
 }
 
@@ -437,28 +641,53 @@ String _getGiB(num bytes) => (bytes * 9.31323e-10).toStringAsFixed(2);
 
 Widget _createMemoryDisplay(
     String name, num used, num usedOutOfTotal, num total) {
-  return ListTile(
-    title: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(name),
-        Row(
-          children: <Widget>[
-            Text('${_getMiB(used)}MiB / ',
-                style: const TextStyle(fontSize: 14, color: Colors.lightGreen)),
-            Text('${_getGiB(usedOutOfTotal)}GiB / ${_getGiB(total)}GiB',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ))
-          ],
+  return Card(
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(24),
+      ),
+    ),
+    child: Column(
+      children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CircularProgressIndicator(
+                    value: usedOutOfTotal / total,
+                    strokeWidth: 8,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                          '${(usedOutOfTotal / total * 100).toStringAsFixed(0)}%',
+                          style: const TextStyle(fontSize: 36)),
+                      Text(name),
+                    ],
+                  )
+                ],
+              )),
+        ),
+        Text('${S.current.memory_game} ${_getMiB(used)}MiB',
+            style: const TextStyle(fontSize: 14, color: Colors.lightGreen)),
+        Text('${S.current.memory_used} ${_getGiB(usedOutOfTotal)}GiB',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            )),
+        Text('${S.current.memory_total} ${_getGiB(total)}GiB',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            )),
+        SizedBox(
+          height: 16,
         )
       ],
     ),
-    subtitle: LinearProgressIndicator(
-      value: usedOutOfTotal / total,
-    ),
-    onTap:
-        () {}, // blank onTap adds the interact splash like in android settings's info
   );
 }

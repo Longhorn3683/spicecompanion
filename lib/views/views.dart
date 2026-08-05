@@ -8,9 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:spicecompanion/generated/l10n.dart';
 import 'package:spicecompanion/spiceapi/spiceapi.dart';
 import 'package:spicecompanion/util/util.dart';
 import 'package:spicecompanion/platform/platform.dart';
@@ -86,7 +88,7 @@ Widget getView(SpiceView view) {
       return Material(
           color: Colors.red,
           child: Center(
-            child: Text('Unknown View \'$view\'',
+            child: Text('${S.current.view_unknown} \'$view\'',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -125,26 +127,26 @@ Icon getViewIcon(SpiceView view) {
 String getViewName(SpiceView view) {
   switch (view) {
     case SpiceView.CardManager:
-      return 'Cards';
+      return S.current.view_cardmanager;
     case SpiceView.Keypad:
-      return 'Keypad/Scanner';
+      return S.current.view_keypad;
     case SpiceView.Patches:
-      return 'Patches';
+      return S.current.view_patches;
     case SpiceView.Screen:
-      return 'Screen (Beta)';
+      return S.current.view_screen;
     case SpiceView.Controller:
-      return 'Controller';
+      return S.current.view_controller;
     case SpiceView.Buttons:
-      return 'Buttons';
+      return S.current.view_buttons;
     case SpiceView.Analogs:
-      return 'Analogs';
+      return S.current.view_analogs;
     case SpiceView.Lights:
-      return 'Lights';
+      return S.current.view_lights;
     case SpiceView.Info:
-      return 'Server Information';
+      return S.current.view_info;
     case SpiceView.Settings:
-      return 'Settings';
+      return S.current.view_settings;
     default:
-      return 'Unknown View';
+      return S.current.view_unknown;
   }
 }

@@ -1,9 +1,7 @@
 part of views;
 
 class NostButton extends ButtonControlButton {
-
-  NostButton(ValueListenable listenable, String name)
-      : super(listenable, name);
+  NostButton(ValueListenable listenable, String name) : super(listenable, name);
 
   @override
   NostButtonState createState() => NostButtonState(this, listenable);
@@ -15,20 +13,16 @@ class NostButtonState extends ButtonControlButtonState {
   @override
   Widget buildContent(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: button.isDown()
-            ? Color(0xFF501010)
-            : Color(0xFF505050),
-        border: Border.all(
-          color: Color(0xFF404040),
-        ),
-      )
-    );
+        decoration: BoxDecoration(
+      color: button.isDown() ? Color(0xFF501010) : Color(0xFF505050),
+      border: Border.all(
+        color: Color(0xFF404040),
+      ),
+    ));
   }
 }
 
 class NostControllerView extends StatefulWidget {
-
   @override
   NostControllerViewState createState() => NostControllerViewState();
 }
@@ -74,47 +68,41 @@ class NostControllerViewState extends State<NostControllerView> {
 
   @override
   Widget build(BuildContext context) {
-    return buttonControl.wrapListener(
-      Scaffold(
-        backgroundColor: Color(0xFF101010),
-        body: Center(
-          child: AspectRatio(
-            aspectRatio: 19 / 9,
-            child: Container(
-              /*decoration: BoxDecoration(
+    return buttonControl.wrapListener(Scaffold(
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 19 / 9,
+          child: Container(
+            /*decoration: BoxDecoration(
                 border: Border.all(
                   color: Color(0xFF102050),
                 ),
               ),*/
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  var areaWidth = constraints.maxWidth;
-                  var areaHeight = constraints.maxHeight;
-                  return Stack(
-                    children: () {
-                      var list = <Widget>[];
-                      var btnNum = 0;
-                      buttonControl.widgets.forEach((btn) {
-                        list.add(Positioned(
-                            left: areaWidth * (btnNum / 28),
-                            top: areaHeight * 0.525,
-                            child: Container(
-                              width: areaWidth * (1 / 28),
-                              height: areaWidth * 0.2125,
-                              child: buttonControl.widgets[btnNum],
-                            )
-                        ));
-                        btnNum++;
-                      });
-                      return list;
-                    } (),
-                  );
-                }
-              ),
-            ),
+            child: LayoutBuilder(builder: (context, constraints) {
+              var areaWidth = constraints.maxWidth;
+              var areaHeight = constraints.maxHeight;
+              return Stack(
+                children: () {
+                  var list = <Widget>[];
+                  var btnNum = 0;
+                  buttonControl.widgets.forEach((btn) {
+                    list.add(Positioned(
+                        left: areaWidth * (btnNum / 28),
+                        top: areaHeight * 0.525,
+                        child: Container(
+                          width: areaWidth * (1 / 28),
+                          height: areaWidth * 0.2125,
+                          child: buttonControl.widgets[btnNum],
+                        )));
+                    btnNum++;
+                  });
+                  return list;
+                }(),
+              );
+            }),
           ),
         ),
-      )
-    );
+      ),
+    ));
   }
 }

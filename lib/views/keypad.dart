@@ -50,6 +50,11 @@ class _KeypadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Card(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(24),
+          ),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
             enableFeedback: true, // may want to make this an option?
@@ -157,7 +162,7 @@ class _KeypadViewState extends State<KeypadView> {
     // check if cards are defined
     if (cardList.length == 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Please add cards first."),
+        content: Text(S.current.add_cards_first),
         backgroundColor: Colors.red,
         duration: Duration(milliseconds: 500),
       ));
@@ -178,7 +183,7 @@ class _KeypadViewState extends State<KeypadView> {
           context: context,
           builder: (BuildContext context) {
             return SimpleDialog(
-              title: Text("Select Card"),
+              title: Text(S.current.card_select),
               children: cardList.map((CardInfo card) {
                 return SimpleDialogOption(
                   child: Text("${card.name} (${card.id})"),
@@ -208,7 +213,7 @@ class _KeypadViewState extends State<KeypadView> {
     ConnectionPool.inst.get().then((con) {
       // show info
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Inserting Card: $id"),
+        content: Text("${S.current.card_inserting}: $id"),
         backgroundColor: getModeColor(),
         duration: Duration(seconds: 1),
       ));
@@ -220,7 +225,7 @@ class _KeypadViewState extends State<KeypadView> {
     }, onError: (err) {
       // show error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Please connect to a server first."),
+        content: Text(S.current.connect_a_server),
         backgroundColor: Colors.deepOrange,
         duration: Duration(seconds: 1),
       ));
@@ -265,113 +270,69 @@ class _KeypadViewState extends State<KeypadView> {
 
   @override
   Widget build(BuildContext context) {
-    return /*Expanded(
-      child: GridView(
-        gridDelegate:
-            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-        children: [
-          _KeypadButton(KeypadKey.Key7, '7', keyCallback),
-          _KeypadButton(KeypadKey.Key8, '8', keyCallback),
-          _KeypadButton(KeypadKey.Key9, '9', keyCallback),
-          _KeypadButton(KeypadKey.Key4, '4', keyCallback),
-          _KeypadButton(KeypadKey.Key5, '5', keyCallback),
-          _KeypadButton(KeypadKey.Key6, '6', keyCallback),
-          _KeypadButton(KeypadKey.Key1, '1', keyCallback),
-          _KeypadButton(KeypadKey.Key2, '2', keyCallback),
-          _KeypadButton(KeypadKey.Key3, '3', keyCallback),
-          _KeypadButton(KeypadKey.Key0, '0', keyCallback),
-          _KeypadButton(KeypadKey.Key00, '00', keyCallback),
-          _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
-          _KeypadButton(
-            KeypadKey.KeyMode,
-            getModeString(),
-            keyCallback,
-            fontSize: 28,
-            fontColor: getModeColor(),
-          ),
-          _KeypadButton(
-            KeypadKey.KeyInsert,
-            'Insert Card',
-            keyCallback,
-            fontSize: 28,
-            fontColor: Colors.deepOrange,
-          ),
-          _KeypadButton(KeypadKey.KeyNone, '', keyCallback),
-        ],
-      ),
-    );*/
-
-        CustomScrollView(
-      physics: NeverScrollableScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          title: Text('Keypad'),
+    return Column(
+      children: [
+        AppBar(
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(getViewName(SpiceView.Keypad)),
         ),
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+        Expanded(
+          child: Row(
             children: <Widget>[
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    _KeypadButton(KeypadKey.Key7, '7', keyCallback),
-                    _KeypadButton(KeypadKey.Key8, '8', keyCallback),
-                    _KeypadButton(KeypadKey.Key9, '9', keyCallback),
-                  ],
-                ),
+              _KeypadButton(KeypadKey.Key7, '7', keyCallback),
+              _KeypadButton(KeypadKey.Key8, '8', keyCallback),
+              _KeypadButton(KeypadKey.Key9, '9', keyCallback),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              _KeypadButton(KeypadKey.Key4, '4', keyCallback),
+              _KeypadButton(KeypadKey.Key5, '5', keyCallback),
+              _KeypadButton(KeypadKey.Key6, '6', keyCallback),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              _KeypadButton(KeypadKey.Key1, '1', keyCallback),
+              _KeypadButton(KeypadKey.Key2, '2', keyCallback),
+              _KeypadButton(KeypadKey.Key3, '3', keyCallback),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              _KeypadButton(KeypadKey.Key0, '0', keyCallback),
+              _KeypadButton(KeypadKey.Key00, '00', keyCallback),
+              _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              _KeypadButton(
+                KeypadKey.KeyMode,
+                getModeString(),
+                keyCallback,
+                fontSize: 28,
+                fontColor: getModeColor(),
               ),
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    _KeypadButton(KeypadKey.Key4, '4', keyCallback),
-                    _KeypadButton(KeypadKey.Key5, '5', keyCallback),
-                    _KeypadButton(KeypadKey.Key6, '6', keyCallback),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    _KeypadButton(KeypadKey.Key1, '1', keyCallback),
-                    _KeypadButton(KeypadKey.Key2, '2', keyCallback),
-                    _KeypadButton(KeypadKey.Key3, '3', keyCallback),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    _KeypadButton(KeypadKey.Key0, '0', keyCallback),
-                    _KeypadButton(KeypadKey.Key00, '00', keyCallback),
-                    _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    _KeypadButton(
-                      KeypadKey.KeyMode,
-                      getModeString(),
-                      keyCallback,
-                      fontSize: 28,
-                      fontColor: getModeColor(),
-                    ),
-                    _KeypadButton(
-                      KeypadKey.KeyInsert,
-                      'Insert Card',
-                      keyCallback,
-                      fontSize: 28,
-                      fontColor: Colors.deepOrange,
-                    ),
-                    _KeypadButton(KeypadKey.KeyNone, '', keyCallback),
-                  ],
-                ),
+              _KeypadButton(
+                KeypadKey.KeyInsert,
+                S.current.card_insert_keypad,
+                keyCallback,
+                fontSize: 28,
+                fontColor: Colors.deepOrange,
               ),
             ],
           ),
         ),
+        SizedBox(height: kBottomNavigationBarHeight),
       ],
     );
   }

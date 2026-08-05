@@ -91,11 +91,12 @@ class _ButtonsViewState extends State<ButtonsView> {
         physics: NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
-            title: Text('Buttons'),
+            systemOverlayStyle: getSystemUiOverlayStyle(context),
+            title: Text(getViewName(SpiceView.Buttons)),
           ),
           SliverFillRemaining(
             child: Center(
-              child: Text('No buttons available :('),
+              child: Text(S.current.no_buttons),
             ),
           ),
         ],
@@ -105,7 +106,8 @@ class _ButtonsViewState extends State<ButtonsView> {
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
-          title: Text('Buttons'),
+          systemOverlayStyle: getSystemUiOverlayStyle(context),
+          title: Text(getViewName(SpiceView.Buttons)),
           actions: <Widget>[
             IconButton(
               icon: Icon(locked ? Icons.lock : Icons.lock_open),
@@ -153,6 +155,8 @@ class _ButtonsViewState extends State<ButtonsView> {
             );
           }).toList(),
         )),
+        SliverPadding(
+            padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
   }
