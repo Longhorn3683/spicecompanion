@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "spicecompanion" "\0"
+            VALUE "CompanyName", "Longhorn3683" "\0"
+            VALUE "FileDescription", "A fork of spicecompanion project" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "spicecompanion" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "" "\0"
             VALUE "OriginalFilename", "spicecompanion.exe" "\0"
-            VALUE "ProductName", "spicecompanion" "\0"
+            VALUE "ProductName", "Spice L3" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
