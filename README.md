@@ -12,7 +12,7 @@ Powered by Flutter 3.7
 - Game status overview
 - Quick Screenshot (Save to companion device)
 - Manage and insert cards
-- Scan cards using NFC
+- Scan cards using NFC (currently support Android and iOS)
 - Virtual Keypad
 - Live Patches: Enable/Disable hex edits on the fly
 - Online patch list download
@@ -23,7 +23,6 @@ Powered by Flutter 3.7
 
 ## Requirements
 - SpiceTools
-- NFC (optional)
 ### OS
 - Android 5.0+
 - iOS 15.0+
