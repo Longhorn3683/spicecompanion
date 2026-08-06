@@ -8,7 +8,7 @@ configured.
 Powered by Flutter 3.7
 
 ## Features
-- Support Android, iOS (include Mac with Apple Chip), HarmonyOS, Windows and Linux
+- Support Android, iOS (include Mac with Apple Chip), HarmonyOS, Windows (other platform coming soon)
 - Game status overview
 - Quick Screenshot (Save to companion device)
 - Manage and insert cards
@@ -29,7 +29,6 @@ Powered by Flutter 3.7
 - iOS 15.0+
 - HarmonyOS 5.0.0+
 - Windows 10+
-- Ubuntu 24.04 (other distribution not tested)
 
 ## How to use with SpiceTools
 In your batch file setup to for usage with SpiceTools, enable the `-api` and
