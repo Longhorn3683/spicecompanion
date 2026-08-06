@@ -8,9 +8,9 @@ configured.
 Powered by Flutter 3.7
 
 ## Features
-- Support various platforms
+- Support Android, iOS (include Mac with Apple Chip), HarmonyOS, Windows and Linux
 - Game status overview
-- Quick Screenshot
+- Quick Screenshot (Save to companion device)
 - Manage and insert cards
 - Scan cards using NFC
 - Virtual Keypad
@@ -23,8 +23,13 @@ Powered by Flutter 3.7
 
 ## Requirements
 - SpiceTools
-- Android 4.4+
 - NFC (optional)
+### OS
+- Android 5.0+
+- iOS 15.0+
+- HarmonyOS 5.0.0+
+- Windows 10+
+- Ubuntu 24.04 (other distribution not tested)
 
 ## How to use with SpiceTools
 In your batch file setup to for usage with SpiceTools, enable the `-api` and

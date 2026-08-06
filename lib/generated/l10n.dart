@@ -435,21 +435,21 @@ class S {
     );
   }
 
-  /// `Kill Game`
-  String get kill_game {
+  /// `Quit Game`
+  String get quit_game {
     return Intl.message(
-      'Kill Game',
-      name: 'kill_game',
+      'Quit Game',
+      name: 'quit_game',
       desc: '',
       args: [],
     );
   }
 
-  /// `Kill Game?`
-  String get kill_game_prompt {
+  /// `Quit Game?`
+  String get quit_game_prompt {
     return Intl.message(
-      'Kill Game?',
-      name: 'kill_game_prompt',
+      'Quit Game?',
+      name: 'quit_game_prompt',
       desc: '',
       args: [],
     );

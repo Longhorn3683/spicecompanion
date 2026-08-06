@@ -275,12 +275,12 @@ class _InfoViewState extends State<InfoView> {
               ),
               MenuItemButton(
                 leadingIcon: Icon(Icons.close),
-                child: Text(S.current.kill_game),
+                child: Text(S.current.quit_game),
                 onPressed: () => showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      content: Text(S.current.kill_game_prompt),
+                      content: Text(S.current.quit_game_prompt),
                       actions: <Widget>[
                         TextButton(
                           child: Text(S.current.cancel),
