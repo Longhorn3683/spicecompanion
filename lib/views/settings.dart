@@ -77,6 +77,35 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
+    Widget getVibrationTile() {
+      if (Platform.isAndroid || Platform.isIOS) {
+        return ListTile(
+          title: Text("${S.current.button_vibration}: " +
+              Settings.buttonVibrationDuration.toInt().toString() +
+              "ms"),
+          subtitle: Slider(
+            value: Settings.buttonVibrationDuration,
+            min: 0,
+            max: 200,
+            divisions: 200,
+            onChanged: (value) {
+              Settings.buttonVibrationDuration = value;
+              Settings.save();
+              setState(() {});
+            },
+            onChangeEnd: (value) {
+              if (value > 0) {
+                Vibration.vibrate(
+                    duration: Settings.buttonVibrationDuration.toInt());
+              }
+            },
+          ),
+        );
+      } else {
+        return SizedBox();
+      }
+    }
+
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
@@ -86,6 +115,19 @@ class _SettingsViewState extends State<SettingsView> {
         SliverList(
           delegate: SliverChildListDelegate(
             [
+              StatefulBuilder(
+                builder: (context, fullscreenState) {
+                  return SwitchListTile(
+                    secondary: Icon(Icons.aspect_ratio),
+                    title: Text(S.current.fullscreen),
+                    value: isFullScreen,
+                    onChanged: (value) {
+                      fullscreenToggle();
+                      setState(() {});
+                    },
+                  );
+                },
+              ),
               SwitchListTile(
                 secondary: Icon(Icons.dark_mode),
                 title: Text(S.current.dark_mode),
@@ -96,22 +138,7 @@ class _SettingsViewState extends State<SettingsView> {
                 },
               ),
               Divider(),
-              /*ListTile(
-            title: Text("Button Vibration Duration: " +
-                Settings.buttonVibrationDuration.toInt().toString() +
-                "ms"),
-            subtitle: Slider(
-              value: Settings.buttonVibrationDuration,
-              min: 0,
-              max: 200,
-              onChanged: (value) {
-                Settings.buttonVibrationDuration = value;
-                Settings.save();
-                //Vibration.vibrate(duration: Settings.buttonVibrationDuration.toInt());
-                setState(() {});
-              },
-            ),
-          ),*/
+              getVibrationTile(),
               ListTile(
                 title: Text("${S.current.screen_quality}: " +
                     Settings.screenQuality.toInt().toString() +
@@ -163,7 +190,13 @@ class _SettingsViewState extends State<SettingsView> {
               ListTile(
                 title: Text(S.current.licenses),
                 onTap: () {
-                  showLicensePage(context: context);
+                  // fix locale bug
+                  final String locale = Intl.defaultLocale;
+                  Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LicensePage()))
+                      .then((val) => Intl.defaultLocale = locale);
                 },
               ),
               ListTile(

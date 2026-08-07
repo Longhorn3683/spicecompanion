@@ -69,7 +69,11 @@
     "vaild_int": "Must be a valid integer!",
     "password": "Password",
     "cannot_be_empty": "Can't be empty!",
+
+    "fullscreen": "Fullscreen",
+    "tap_to_show_bar": "Tap screen top to show top bar",
     "dark_mode": "Dark Mode",
+    "button_vibration": "Button Vibration Duration",
     "screen_quality": "Screen Quality",
     "screen_threads": "Screen Threads",
     "screen_divide": "Screen Divide",

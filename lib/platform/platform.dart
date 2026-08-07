@@ -129,10 +129,7 @@ void fullscreenToggle() async {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
       isFullScreen = true;
     } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
-        SystemUiOverlay.top,
-        SystemUiOverlay.bottom,
-      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       isFullScreen = false;
     }
   }

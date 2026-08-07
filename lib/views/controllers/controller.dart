@@ -105,28 +105,53 @@ class _ControllerViewState extends State<ControllerView> {
         }
 
         // return container of sub view
-        return CustomScrollView(
-          physics: NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              systemOverlayStyle: getSystemUiOverlayStyle(context),
-              title: Text(getViewName(SpiceView.Controller)),
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.autorenew),
-                  onPressed: () {
-                    controllerViewNo.value++;
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
-            SliverFillRemaining(
-              child: Padding(
-                  padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-                  child: Center(child: subView)),
-            ),
-          ],
+        return Listener(
+          onPointerDown: (p) {
+            if (p.position.dy < MediaQuery.of(context).padding.top + 16) {
+              setState(() {
+                toolbarHidden = false;
+              });
+            }
+          },
+          child: CustomScrollView(
+            physics: NeverScrollableScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                toolbarHeight: toolbarHidden ? 0 : kToolbarHeight,
+                systemOverlayStyle: getSystemUiOverlayStyle(context),
+                title: Text(getViewName(SpiceView.Controller)),
+                actions: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.autorenew),
+                    onPressed: () {
+                      controllerViewNo.value++;
+                      setState(() {});
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.expand_less),
+                    onPressed: () {
+                      setState(() {
+                        toolbarHidden = !toolbarHidden;
+                      });
+                      if (toolbarHidden == true) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(S.current.tap_to_show_bar),
+                          duration: Duration(seconds: 1),
+                        ));
+                      }
+                    },
+                  ),
+                ],
+              ),
+              SliverFillRemaining(
+                child: Padding(
+                    padding:
+                        EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                    child: Center(child: subView)),
+              ),
+            ],
+          ),
         );
       },
     );

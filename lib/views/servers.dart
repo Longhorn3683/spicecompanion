@@ -1,7 +1,7 @@
 part of views;
 
 const cStoredServers = 'server_list'; // preferences key
-List<ServerInfo> serverList = List<ServerInfo>();
+List<ServerInfo> serverList = [];
 
 class ServerInfo {
   String name = "Server";
@@ -50,7 +50,7 @@ class _ServerViewState extends State<ServerView> {
     // reload server list
     preferencesGetStringList(cStoredServers).then((storedList) {
       if (storedList != null) {
-        List<ServerInfo> newList = List<ServerInfo>();
+        List<ServerInfo> newList = [];
         for (var json in storedList) {
           try {
             var server = ServerInfo.fromJson(json);
@@ -282,15 +282,6 @@ class _ServerViewState extends State<ServerView> {
       // update state since the active server changed
       if (mounted) setState(() {});
     });
-  }
-
-  void _showOptions(ServerInfo server) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => SimpleDialog(
-        children: <Widget>[],
-      ),
-    );
   }
 }
 

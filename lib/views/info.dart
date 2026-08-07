@@ -148,7 +148,6 @@ class _InfoViewState extends State<InfoView> {
     return CustomScrollView(slivers: [
       SliverAppBar(
         systemOverlayStyle: getSystemUiOverlayStyle(context),
-        //toolbarHeight: toolbarHidden ? 0 : null,
         actions: [
           IconButton(
             icon: Icon(Icons.screenshot_monitor),
@@ -215,16 +214,6 @@ class _InfoViewState extends State<InfoView> {
                   });
                 }, onError: (e) {}),
               ),
-              /*MenuItemButton(
-                            child: Text('Custom'),
-                            onPressed: () =>
-                                ConnectionPool.inst.get().then((con) {
-                              coinInsert(con, 114514).whenComplete(() {
-                                con.free();
-                              });
-                              con.free();
-                            }, onError: (e) {}),
-                          ),*/
             ],
           ),
           MenuAnchor(
@@ -361,19 +350,6 @@ class _InfoViewState extends State<InfoView> {
               ),
             ],
           ),
-          /*list.add(
-                  IconButton(
-                    icon: Icon(Icons.aspect_ratio),
-                    onPressed: () {
-                      if (!isFullScreen) {
-                        setState(() {
-                          toolbarHidden = !toolbarHidden;
-                        });
-                      }
-                      fullscreenToggle();
-                    },
-                  ),
-                );*/
         ],
         pinned: true,
       ),
@@ -382,180 +358,204 @@ class _InfoViewState extends State<InfoView> {
         sliver: SliverList(
           delegate: SliverChildListDelegate(
             [
-              StatefulBuilder(
-                builder: (context, cardState) {
-                  //cardRefresh = () => cardState(() {});
-
-                  void nextMode() {
-                    currentMode = (currentMode + 1) % 2;
-                    if (getPlayerCount(gameModel) <= 1) currentMode = 0;
-                    cardState(() {});
-                  }
-
-                  return Theme(
-                    data: spiceThemes[SpiceTheme.Dark],
-                    child: Card(
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(24),
-                        ),
-                      ),
-                      color: getModeColor(),
-                      clipBehavior: Clip.antiAlias,
-                      child: ListTile(
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          trailing: IconButton(
-                            icon: Text(
-                              'P${currentMode + 1}',
-                              style: TextStyle(fontSize: 24),
-                            ),
-                            onPressed: () {
-                              nextMode();
-                            },
-                          ),
-                          title: Text(S.current.swipe_card),
-                          subtitle: Text(S.current.or_select_in_cards),
-                          onTap: () async {
-                            // check if cards are loaded
-                            if (!cardListLoaded) await cardListLoad();
-
-                            // check if cards are defined
-                            if (cardList.length == 0) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text(S.current.add_cards_first),
-                                backgroundColor: Colors.red,
-                                duration: Duration(milliseconds: 500),
-                              ));
-                              return;
-                            }
-
-                            // check if we only have one card
-                            var card;
-                            if (cardList.length == 1) {
-                              // just use that one then
-                              card = cardList[0];
-                            } else if (cardList.any((i) => i.active)) {
-                              // use the active card
-                              card = cardList.firstWhere((i) => i.active);
-                            } else {
-                              // show card selection dialog
-                              card = await showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return SimpleDialog(
-                                      clipBehavior: Clip.antiAlias,
-                                      title: Text(S.current.card_select),
-                                      children: cardList.map((CardInfo card) {
-                                        return SimpleDialogOption(
-                                          child:
-                                              Text("${card.name} (${card.id})"),
-                                          onPressed: () {
-                                            Navigator.pop(context, card);
-                                          },
-                                        );
-                                      }).toList(),
-                                    );
-                                  });
-                            }
-
-                            // check result
-                            if (card != null && card is CardInfo) {
-                              // move card to index 0 since we want the last used cards at the top
-                              cardList.remove(card);
-                              cardList.insert(0, card);
-                              cardListSave();
-
-                              // insert
-                              insertCardID(card.id);
-                            }
-                          }),
-                    ),
-                  );
-                },
-              ),
-
-              SizedBox(height: 4),
-
-              // AVS
-              Card(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(24),
-                  ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: ListTile(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  title: Text(_gameServer),
-                  subtitle: Text('$_avsTitle\n$_avsServices'),
-                  onTap: () => showModalBottomSheet(
-                      context: context,
-                      clipBehavior: Clip.antiAlias,
-                      builder: (context) => ServerView()),
-                ),
-              ),
-
-              SizedBox(height: 4),
-
-              // Memory Usage
-              Row(
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 4,
                 children: [
-                  Expanded(
-                    child: _createMemoryDisplay(
-                        'RAM', _memUsed, _memTotalUsed, _memTotal),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 400),
+                    child: Column(
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, cardState) {
+                            //cardRefresh = () => cardState(() {});
+
+                            void nextMode() {
+                              currentMode = (currentMode + 1) % 2;
+                              if (getPlayerCount(gameModel) <= 1)
+                                currentMode = 0;
+                              cardState(() {});
+                            }
+
+                            return Theme(
+                              data: spiceThemes[SpiceTheme.Dark],
+                              child: Card(
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(24),
+                                  ),
+                                ),
+                                color: getModeColor(),
+                                clipBehavior: Clip.antiAlias,
+                                child: ListTile(
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    trailing: IconButton(
+                                      icon: Text(
+                                        'P${currentMode + 1}',
+                                        style: TextStyle(fontSize: 24),
+                                      ),
+                                      onPressed: () {
+                                        nextMode();
+                                      },
+                                    ),
+                                    title: Text(S.current.swipe_card),
+                                    subtitle:
+                                        Text(S.current.or_select_in_cards),
+                                    onTap: () async {
+                                      // check if cards are loaded
+                                      if (!cardListLoaded) await cardListLoad();
+
+                                      // check if cards are defined
+                                      if (cardList.length == 0) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content:
+                                              Text(S.current.add_cards_first),
+                                          backgroundColor: Colors.red,
+                                          duration: Duration(milliseconds: 500),
+                                        ));
+                                        return;
+                                      }
+
+                                      // check if we only have one card
+                                      var card;
+                                      if (cardList.length == 1) {
+                                        // just use that one then
+                                        card = cardList[0];
+                                      } else if (cardList
+                                          .any((i) => i.active)) {
+                                        // use the active card
+                                        card = cardList
+                                            .firstWhere((i) => i.active);
+                                      } else {
+                                        // show card selection dialog
+                                        card = await showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return SimpleDialog(
+                                                clipBehavior: Clip.antiAlias,
+                                                title:
+                                                    Text(S.current.card_select),
+                                                children: cardList
+                                                    .map((CardInfo card) {
+                                                  return SimpleDialogOption(
+                                                    child: Text(
+                                                        "${card.name} (${card.id})"),
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                          context, card);
+                                                    },
+                                                  );
+                                                }).toList(),
+                                              );
+                                            });
+                                      }
+
+                                      // check result
+                                      if (card != null && card is CardInfo) {
+                                        // move card to index 0 since we want the last used cards at the top
+                                        cardList.remove(card);
+                                        cardList.insert(0, card);
+                                        cardListSave();
+
+                                        // insert
+                                        insertCardID(card.id);
+                                      }
+                                    }),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 4),
+                        // AVS
+                        Card(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(24),
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            title: Text(_gameServer),
+                            subtitle: Text('$_avsTitle\n$_avsServices'),
+                            onTap: () => showModalBottomSheet(
+                                context: context,
+                                clipBehavior: Clip.antiAlias,
+                                builder: (context) => ServerView()),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        // Memory Usage
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _createMemoryDisplay(
+                                  'RAM', _memUsed, _memTotalUsed, _memTotal),
+                            ),
+                            SizedBox(width: 4),
+                            Expanded(
+                              child: _createMemoryDisplay('Swap', _vmemUsed,
+                                  _vmemTotalUsed, _vmemTotal),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 4),
-                  Expanded(
-                    child: _createMemoryDisplay(
-                        'Swap', _vmemUsed, _vmemTotalUsed, _vmemTotal),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 400),
+                    child: Column(
+                      children: [
+                        // Launcher Info
+                        _createCard('spice2x',
+                            '${_launcherVersion}\n${_launcherCompileDate != null ? _getDateTimeFromGCC(_launcherCompileDate, _launcherCompileTime) : _disconnectMsg}'),
+
+                        SizedBox(height: 4),
+
+                        _createCard(
+                            S.current.system_time,
+                            _launcherSystemTime != null
+                                ? _formatSystemTime(
+                                    _launcherSystemTime.toLocal())
+                                : _disconnectMsg),
+
+                        SizedBox(height: 4),
+
+                        Card(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(24),
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Column(
+                            children: [
+                              ListTile(
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                title: Text(
+                                    '${S.current.launch_args} (${_launcherArgs.length - 1})'),
+                              ),
+                              ListView(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                physics: NeverScrollableScrollPhysics(),
+                                children: _getArgList(_launcherArgs),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                      ],
+                    ),
                   ),
                 ],
               ),
-
-              SizedBox(height: 4),
-
-              // Launcher Info
-              _createCard('spice2x',
-                  '${_launcherVersion}\n${_launcherCompileDate != null ? _getDateTimeFromGCC(_launcherCompileDate, _launcherCompileTime) : _disconnectMsg}'),
-
-              SizedBox(height: 4),
-
-              _createCard(
-                  S.current.system_time,
-                  _launcherSystemTime != null
-                      ? _formatSystemTime(_launcherSystemTime.toLocal())
-                      : _disconnectMsg),
-
-              SizedBox(height: 4),
-
-              Card(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(24),
-                  ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      title: Text(
-                          '${S.current.launch_args} (${_launcherArgs.length - 1})'),
-                    ),
-                    ListView(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      physics: NeverScrollableScrollPhysics(),
-                      children: _getArgList(_launcherArgs),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 4 + kBottomNavigationBarHeight),
+              SizedBox(height: kBottomNavigationBarHeight),
             ],
           ),
         ),

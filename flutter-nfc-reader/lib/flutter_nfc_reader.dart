@@ -53,10 +53,9 @@ class NfcData {
 }
 
 class FlutterNfcReader {
-  static const MethodChannel _channel =
-      const MethodChannel('flutter_nfc_reader');
+  static const MethodChannel _channel = MethodChannel('flutter_nfc_reader');
   static const stream =
-      const EventChannel('it.matteocrippa.flutternfcreader.flutter_nfc_reader');
+      EventChannel('it.matteocrippa.flutternfcreader.flutter_nfc_reader');
 
   static Stream<NfcData> get read {
     final resultStream = _channel

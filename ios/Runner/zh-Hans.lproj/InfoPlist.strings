@@ -1,0 +1,11 @@
+/* 
+  InfoPlist.strings
+  Runner
+
+  Created by longhorn3683 on 2026/8/7.
+  
+*/
+
+"NFCReaderUsageDescription" = "Spice L3需要NFC权限以读取您的卡片";
+"NSLocalNetworkUsageDescription" = "Spice L3需要本地网络权限以控制spice2x设备";
+"NSPhotoLibraryUsageDescription" = "Spice L3需要照片权限以保存截图";

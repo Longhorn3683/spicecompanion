@@ -1,7 +1,7 @@
 part of views;
 
 const cCards = 'cards'; // preferences key
-List<CardInfo> cardList = new List<CardInfo>();
+List<CardInfo> cardList = [];
 bool cardListLoaded = false;
 
 Future<void> cardListSave() {
@@ -13,7 +13,7 @@ Future<void> cardListSave() {
 Future<void> cardListLoad() async {
   var storedList = await preferencesGetStringList(cCards);
   if (storedList != null) {
-    List<CardInfo> newList = List<CardInfo>();
+    List<CardInfo> newList = [];
     for (var json in storedList) {
       try {
         var card = CardInfo.fromJson(json);
@@ -24,7 +24,7 @@ Future<void> cardListLoad() async {
     }
     cardList = newList;
   } else {
-    cardList = new List<CardInfo>();
+    cardList = [];
   }
   cardListLoaded = true;
 }
@@ -74,6 +74,7 @@ class _CardManagerViewState extends State<CardManagerView> {
   Widget build(BuildContext context) {
     // build card list from `cardList`
     return CustomScrollView(
+      shrinkWrap: true,
       slivers: [
         SliverAppBar.large(
           systemOverlayStyle: getSystemUiOverlayStyle(context),

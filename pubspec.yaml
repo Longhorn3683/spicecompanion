@@ -2,7 +2,7 @@ name: spicecompanion
 description: A fork of spicecompanion project
 publish_to: none
 
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -30,6 +30,7 @@ dependencies:
       ref: sensors_plus-7.2.0-ohos.1.0.0-beta.1
   path: ^1.8.0
   #vibration: ^1.7.3
+  vibration: ^2.1.0
   mutex: ^1.1.0
   desktop_window: ^0.3.0
   gallery_saver:

@@ -685,11 +685,41 @@ class S {
     );
   }
 
+  /// `Fullscreen`
+  String get fullscreen {
+    return Intl.message(
+      'Fullscreen',
+      name: 'fullscreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap screen top to show top bar`
+  String get tap_to_show_bar {
+    return Intl.message(
+      'Tap screen top to show top bar',
+      name: 'tap_to_show_bar',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Dark Mode`
   String get dark_mode {
     return Intl.message(
       'Dark Mode',
       name: 'dark_mode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Button Vibration Duration`
+  String get button_vibration {
+    return Intl.message(
+      'Button Vibration Duration',
+      name: 'button_vibration',
       desc: '',
       args: [],
     );

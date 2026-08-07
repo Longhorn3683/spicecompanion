@@ -72,8 +72,8 @@ class ButtonControl {
 
   void vibrate() async {
     var vibrationMs = Settings.buttonVibrationDuration.toInt();
-    if (vibrationMs > 1) {
-      //Vibration.vibrate(duration: vibrationMs);
+    if (vibrationMs > 0) {
+      Vibration.vibrate(duration: vibrationMs);
     }
   }
 

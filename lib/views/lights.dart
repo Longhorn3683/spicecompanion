@@ -5,17 +5,17 @@ class LightsView extends StatefulWidget {
 }
 
 class _LightsViewState extends State<LightsView> {
-  List<LightState> _lightStates = List();
+  List<LightState> _lightStates = [];
   bool _lightStatesLock = false;
   Timer refreshTimer;
   int updateCount = 0;
   bool locked = false;
-  List<String> ignoreLightNames = List();
+  List<String> ignoreLightNames = [];
 
   @override
   void initState() {
     super.initState();
-    ignoreLightNames = List();
+    ignoreLightNames = [];
     if (!locked) freeList();
     update();
   }
@@ -69,7 +69,7 @@ class _LightsViewState extends State<LightsView> {
 
           // apply new list
           _lightStatesLock = true;
-          List<LightState> newList = List();
+          List<LightState> newList = [];
           for (var newState in stateList) {
             if (newState.active) locked = true;
             if (!ignoreLightNames.contains(newState.name))
@@ -87,7 +87,7 @@ class _LightsViewState extends State<LightsView> {
         }).whenComplete(() => con.free());
       }, onError: (e) {
         // clear list on disconnect
-        _lightStates = List();
+        _lightStates = [];
       }).whenComplete(() => updateCount--);
     }
   }

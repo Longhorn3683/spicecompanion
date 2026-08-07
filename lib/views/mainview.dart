@@ -10,6 +10,8 @@ String _gameName = "";
 String _gameServer = "";
 Duration lastPing = Duration(seconds: 1);
 
+bool toolbarHidden = false;
+
 enum SpiceTheme { Light, Dark }
 
 final spiceThemes = {
@@ -32,15 +34,12 @@ class _MainViewState extends State<MainView> {
   SpiceView _currentView;
   Widget _viewWidget;
 
-  Widget _gameAvatar;
   static Timer _gameTimer;
   static bool _gameTickActive = false;
-  static bool toolbarHidden = false;
 
   _MainViewState() {
     _setView(defaultSpiceView);
     _gameTimerReset();
-    _gameAvatar = Image.asset("assets/spice.png");
 
     // subscribe to pool changes for quick info refresh
     ConnectionPool.inst.changes.stream.listen((pool) {
@@ -108,7 +107,6 @@ class _MainViewState extends State<MainView> {
       setState(() {
         _gameName = S.current.disconnected;
         _gameServer = S.current.connect_a_server;
-        _gameAvatar = Image.asset("assets/spice.png");
       });
     });
   }
@@ -129,16 +127,7 @@ class _MainViewState extends State<MainView> {
         home:
             StatefulBuilder(builder: (BuildContext context, StateSetter state) {
           return Scaffold(
-            body: Listener(
-              onPointerDown: (p) {
-                if (toolbarHidden && p.position.dy < 16) {
-                  setState(() {
-                    toolbarHidden = false;
-                  });
-                }
-              },
-              child: _viewWidget,
-            ),
+            body: _viewWidget,
             drawer: NavigationDrawer(
               selectedIndex: selectedIndex,
               onDestinationSelected: (int index) {

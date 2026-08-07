@@ -1,13 +1,8 @@
 part of util;
 
-enum PatchState {
-  Unknown,
-  Enabled,
-  Disabled
-}
+enum PatchState { Unknown, Enabled, Disabled }
 
 abstract class Patch {
-
   String name = "Patch";
   String description = "";
   String gameCode = "";
@@ -54,10 +49,8 @@ abstract class Patch {
   }
 
   bool isInRange(int dateCode) {
-    if (dateCodeMin == 0 && dateCodeMax == 0)
-      return true;
-    if (dateCodeMax == 0)
-      return dateCode >= dateCodeMin;
+    if (dateCodeMin == 0 && dateCodeMax == 0) return true;
+    if (dateCodeMax == 0) return dateCode >= dateCodeMin;
     return dateCode >= dateCodeMin && dateCode <= dateCodeMax;
   }
 
@@ -73,11 +66,9 @@ abstract class Patch {
     return false;
   }
 
-  void resetState() {
-  }
+  void resetState() {}
 
   Future<String> detectDLLName(Connection con, String oldName) async {
-
     // omnimix detection
     if (gameModel == "LDJ" && gameRev == "X") {
       return memoryRead(con, "bm2dx_omni.dll", 302252, 1).then((v) {
@@ -100,8 +91,7 @@ class _MemoryPatchData {
 }
 
 class MemoryPatch extends Patch {
-
-  List<_MemoryPatchData> _patches = List<_MemoryPatchData>();
+  List<_MemoryPatchData> _patches = [];
 
   MemoryPatch.fromMap(Map map) : super.fromMap(map) {
     for (var patch in map["patches"] ?? []) {
@@ -129,7 +119,7 @@ class MemoryPatch extends Patch {
     map["type"] = "memory";
 
     // add all patches
-    List patchesList = List();
+    List patchesList = [];
     for (var data in _patches) {
       Map patch = Map();
       patch["dllName"] = data.dllName;
@@ -143,11 +133,9 @@ class MemoryPatch extends Patch {
 
   @override
   Future<PatchState> getState(Connection con) async {
-
     // get state for each patch
-    List<PatchState> states = List();
-    for (var patch in _patches)
-      states.add(await getSingleState(con, patch));
+    List<PatchState> states = [];
+    for (var patch in _patches) states.add(await getSingleState(con, patch));
 
     // get final patch state
     bool disabled = false;
@@ -156,8 +144,7 @@ class MemoryPatch extends Patch {
         case PatchState.Unknown:
           return PatchState.Unknown;
         case PatchState.Enabled:
-          if (disabled)
-            return PatchState.Unknown;
+          if (disabled) return PatchState.Unknown;
           continue;
         case PatchState.Disabled:
           disabled = true;
@@ -173,11 +160,9 @@ class MemoryPatch extends Patch {
 
   Future<PatchState> getSingleState(
       Connection con, _MemoryPatchData patch) async {
-
     // check super state
     var superState = await super.getState(con);
-    if (superState != PatchState.Unknown)
-      return superState;
+    if (superState != PatchState.Unknown) return superState;
 
     // check lengths
     if (patch.dataEnabled.length == 0 && patch.dataDisabled.length == 0)
@@ -187,21 +172,15 @@ class MemoryPatch extends Patch {
     var dllName = await detectDLLName(con, patch.dllName);
 
     // read memory
-    return memoryRead(
-        con,
-        dllName,
-        patch.dataOffset,
-        max(patch.dataEnabled.length, patch.dataDisabled.length) >> 1
-    ).then((data) {
-
+    return memoryRead(con, dllName, patch.dataOffset,
+            max(patch.dataEnabled.length, patch.dataDisabled.length) >> 1)
+        .then((data) {
       // check data
       if (patch.dataEnabled.length > 0 && data.startsWith(patch.dataEnabled))
         return PatchState.Enabled;
       else if (patch.dataDisabled.length > 0 &&
-          data.startsWith(patch.dataDisabled))
-        return PatchState.Disabled;
+          data.startsWith(patch.dataDisabled)) return PatchState.Disabled;
       return PatchState.Unknown;
-
     }, onError: (_) {
       return PatchState.Unknown;
     });
@@ -209,25 +188,20 @@ class MemoryPatch extends Patch {
 
   @override
   Future<bool> setState(Connection con, PatchState state) async {
-
     // set state for each patch
-    List<bool> states = List();
+    List<bool> states = [];
     for (var patch in _patches)
       states.add(await setSingleState(con, state, patch));
 
     // check for failure
-    for (var state in states)
-      if (!state)
-        return false;
+    for (var state in states) if (!state) return false;
     return true;
   }
 
   Future<bool> setSingleState(
       Connection con, PatchState state, _MemoryPatchData patch) async {
-
     // check super
-    if (await super.setState(con, state))
-      return true;
+    if (await super.setState(con, state)) return true;
 
     // check state
     switch (state) {
@@ -235,14 +209,14 @@ class MemoryPatch extends Patch {
         return true;
       case PatchState.Enabled:
         var dllName = await detectDLLName(con, patch.dllName);
-        return memoryWrite(
-            con, dllName, patch.dataEnabled, patch.dataOffset).then((_) {
+        return memoryWrite(con, dllName, patch.dataEnabled, patch.dataOffset)
+            .then((_) {
           return true;
         });
       case PatchState.Disabled:
         var dllName = await detectDLLName(con, patch.dllName);
-        return memoryWrite(
-            con, dllName, patch.dataDisabled, patch.dataOffset).then((_) {
+        return memoryWrite(con, dllName, patch.dataDisabled, patch.dataOffset)
+            .then((_) {
           return true;
         });
       default:
@@ -252,7 +226,6 @@ class MemoryPatch extends Patch {
 }
 
 class SignaturePatch extends Patch {
-
   String dllName = "";
   String signature = "";
   String replacement = "";
@@ -292,15 +265,12 @@ class SignaturePatch extends Patch {
 
   @override
   Future<PatchState> getState(Connection con) async {
-
     // check super state
     var superState = await super.getState(con);
-    if (superState != PatchState.Unknown)
-      return superState;
+    if (superState != PatchState.Unknown) return superState;
 
     // check raw offset since it will be non-zero once enabled
-    if (rawOffset > 0)
-      return PatchState.Enabled;
+    if (rawOffset > 0) return PatchState.Enabled;
 
     // check if the signature can be found
     return PatchState.Disabled;
@@ -308,10 +278,8 @@ class SignaturePatch extends Patch {
 
   @override
   Future<bool> setState(Connection con, PatchState state) async {
-
     // check super
-    if (await super.setState(con, state))
-      return true;
+    if (await super.setState(con, state)) return true;
 
     // get dll name
     var detectedDLLName = await detectDLLName(con, dllName);
@@ -324,37 +292,24 @@ class SignaturePatch extends Patch {
 
         // find patch position
         return memorySignature(
-            con,
-            detectedDLLName,
-            signature,
-            "",
-            offset,
-            usage
-        ).then((rawOffset) async {
-
+                con, detectedDLLName, signature, "", offset, usage)
+            .then((rawOffset) async {
           // remember data
           this.rawOffset = rawOffset;
-          return memoryRead(
-              con,
-              detectedDLLName,
-              rawOffset,
-              replacement.length
-          ).then((data) {
+          return memoryRead(con, detectedDLLName, rawOffset, replacement.length)
+              .then((data) {
             this.dataDisabled = data;
 
             // actually apply the patch
             return memorySignature(
-                con, detectedDLLName, signature, replacement, offset, usage
-            ).then((rawOffset2) {
-
+                    con, detectedDLLName, signature, replacement, offset, usage)
+                .then((rawOffset2) {
               // both offsets should be exactly the same
-              if (rawOffset == rawOffset2)
-                return true;
+              if (rawOffset == rawOffset2) return true;
 
               // failure - shouldn't happen in practice
               this.resetState();
               return false;
-
             }, onError: (e) {
               this.resetState();
               return false;
@@ -363,15 +318,13 @@ class SignaturePatch extends Patch {
             this.resetState();
             return false;
           });
-
         }, onError: (e) => false);
 
       case PatchState.Disabled:
 
         // write old data back
-        return memoryWrite(
-            con, detectedDLLName, dataDisabled, rawOffset
-        ).then((_) {
+        return memoryWrite(con, detectedDLLName, dataDisabled, rawOffset).then(
+            (_) {
           this.resetState();
           return true;
         }, onError: (e) {
@@ -396,16 +349,15 @@ class PatchManager {
   PatchManager();
 
   void importDefaults() async {
-
     // load file list
-    var files = jsonDecode(await rootBundle.loadString(
-        "assets/patches/presets.json", cache: false));
+    var files = jsonDecode(await rootBundle
+        .loadString("assets/patches/presets.json", cache: false));
 
     // import patches from each file
     for (var file in files) {
       try {
-        var json = await rootBundle.loadString(
-            "assets/patches/$file", cache: false);
+        var json =
+            await rootBundle.loadString("assets/patches/$file", cache: false);
         addPatchesFromJson(json);
       } on Error catch (e) {
         print("Failed importing presets from $file: ${e.toString()}");
@@ -431,8 +383,7 @@ class PatchManager {
   Future<void> _load() async {
     try {
       var json = await preferencesGetString(preferencesKeyPatches);
-      if (json != null && json.length > 0)
-        addPatchesFromJson(json);
+      if (json != null && json.length > 0) addPatchesFromJson(json);
     } catch (e) {
       await preferencesSetString(preferencesKeyPatches, "");
     }
@@ -440,15 +391,13 @@ class PatchManager {
 
   int countPatches() {
     int count = 0;
-    for (var list in _patchList.values)
-      count += list.length;
+    for (var list in _patchList.values) count += list.length;
     return count;
   }
 
   String getPatchesJSON() {
-
     // write patches to map
-    List data = List();
+    List data = [];
     _patchList.forEach((gameCode, list) {
       list.forEach((patch) {
         if (!patch.preset) {
@@ -464,7 +413,7 @@ class PatchManager {
   }
 
   String getPatchesJSONCustom() {
-    List data = List();
+    List data = [];
     _patchList.forEach((gameCode, list) {
       list.forEach((patch) {
         if (!patch.preset && !patch.online) {
@@ -478,7 +427,7 @@ class PatchManager {
   }
 
   String getPatchesJSONOnline() {
-    List data = List();
+    List data = [];
     _patchList.forEach((gameCode, list) {
       list.forEach((patch) {
         if (!patch.preset && patch.online) {
@@ -492,13 +441,11 @@ class PatchManager {
   }
 
   List<Patch> getPatches(String gameCode, int dateCode) {
-
     // get patches
-    List<Patch> resultList = List();
-    var gamePatches = _patchList[gameCode] ?? List();
+    List<Patch> resultList = [];
+    var gamePatches = _patchList[gameCode] ?? [];
     for (var patch in gamePatches) {
-      if (patch.isInRange(dateCode))
-        resultList.add(patch);
+      if (patch.isInRange(dateCode)) resultList.add(patch);
     }
 
     // SDVX Heavenly Custom
@@ -510,9 +457,8 @@ class PatchManager {
   }
 
   void addPatch(Patch patch, {bool save = true}) {
-
     // get game list of patches
-    var gamePatches = _patchList[patch.gameCode] ?? List();
+    var gamePatches = _patchList[patch.gameCode] ?? [];
 
     // check for duplicates
     gamePatches.removeWhere((patch2) {
@@ -528,23 +474,21 @@ class PatchManager {
     _patchList[patch.gameCode] = gamePatches;
 
     // save
-    if (save)
-      this._save();
+    if (save) this._save();
   }
 
   void removePatch(Patch patch, {bool save = true}) {
     var list = _patchList[patch.gameCode];
     if (list != null)
       list.removeWhere((patch2) {
-        return patch.name == patch2.name
-            && patch.gameCode == patch2.gameCode
-            && patch.dateCodeMin == patch2.dateCodeMin
-            && patch.dateCodeMax == patch2.dateCodeMax
-            && patch.preset == patch2.preset
-            && patch.online == patch2.online;
+        return patch.name == patch2.name &&
+            patch.gameCode == patch2.gameCode &&
+            patch.dateCodeMin == patch2.dateCodeMin &&
+            patch.dateCodeMax == patch2.dateCodeMax &&
+            patch.preset == patch2.preset &&
+            patch.online == patch2.online;
       });
-    if (save)
-      this._save();
+    if (save) this._save();
   }
 
   void addPatchFromMap(Map map) {
@@ -554,7 +498,6 @@ class PatchManager {
   void addPatchesFromJson(String json, {bool online = false}) {
     List data = jsonDecode(json);
     for (var map in data) {
-
       // forced values for online imports
       if (online) {
         map["preset"] = false;
@@ -582,5 +525,4 @@ class PatchManager {
       });
     });
   }
-
 }

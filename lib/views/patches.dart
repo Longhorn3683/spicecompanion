@@ -69,7 +69,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
 
   // state
   _PatchesSubViewSetting setting;
-  List<PatchCache> patchList = List();
+  List<PatchCache> patchList = [];
 
   _PatchesSubViewState({this.setting});
 
@@ -81,7 +81,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
         var dateCode = int.parse(avs["ext"]);
 
         // get patches
-        List<Patch> patches = List();
+        List<Patch> patches = [];
         switch (this.setting) {
           case _PatchesSubViewSetting.Preset:
             for (var patch in PatchManager.inst.getPatches(gameCode, dateCode))
@@ -98,7 +98,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
         }
 
         // add patches to cache
-        List<PatchCache> newList = List();
+        List<PatchCache> newList = [];
         for (var patch in patches) {
           newList.add(PatchCache(patch, await patch.getState(con)));
         }
@@ -108,7 +108,7 @@ class _PatchesSubViewState extends State<PatchesSubView> {
         if (mounted) setState(() {});
       }).whenComplete(() => con.free());
     }, onError: (e) {
-      this.patchList = List();
+      this.patchList = [];
     });
   }
 

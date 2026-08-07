@@ -29,11 +29,27 @@ Powered by Flutter 3.7
 - HarmonyOS 5.0.0+
 - Windows 10+
 
-## How to use with SpiceTools
-In your batch file setup to for usage with SpiceTools, enable the `-api` and
-`-apipass` parameters with your desired port and password, respectively. After
+## iOS and HarmonyOS
+iOS and HarmonyOS packages were unsigned. Use sideload tools to install.
+- iOS: [Sideloadly](https://sideloadly.io)
+- HarmonyOS: [小白调试助手](https://github.com/likuai2010/auto-installer)
+- macOS (arm64): [PlayCover](https://playcover.io) (remember to remove PlayTools).
+
+## How to use with spice2x
+1. Open spicecfg.exe
+2. Click 'Options'
+3. Click 'API'
+4. Set 'API TCP Port' ('API Password' is optional)
+5. Restart spicecfg.exe
+
+If firewall window appears, please click 'Allow'.
+
+After
 you've done that, add your server in the app, connect to it, and you're good
 to go!
+
+You can also use `-api` and
+`-apipass` parameters with your desired port and password, respectively. 
 
 Example usage of the parameters:
 `-api 1337 -apipass changeme`

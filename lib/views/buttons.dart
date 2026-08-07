@@ -6,7 +6,7 @@ class ButtonsView extends StatefulWidget {
 }
 
 class _ButtonsViewState extends State<ButtonsView> {
-  List<ButtonState> _buttonStates = List();
+  List<ButtonState> _buttonStates = [];
   Timer refreshTimer;
   int updateCount = 0;
   bool locked = false;
@@ -78,7 +78,7 @@ class _ButtonsViewState extends State<ButtonsView> {
         }).whenComplete(() => con.free());
       }, onError: (e) {
         // clear list on disconnect
-        _buttonStates = List();
+        _buttonStates = [];
       }).whenComplete(() => updateCount--);
     }
   }

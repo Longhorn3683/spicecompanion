@@ -1,0 +1,11 @@
+/* 
+  InfoPlist.strings
+  Runner
+
+  Created by longhorn3683 on 2026/8/7.
+  
+*/
+
+"NFCReaderUsageDescription" = "Spice L3 needs NFC permission to read your card";
+"NSLocalNetworkUsageDescription" = "Spice L3 needs local network permission to control spice2x devices";
+"NSPhotoLibraryUsageDescription" = "Spice L3 needs photo library permission to save screenshots";

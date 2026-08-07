@@ -6,17 +6,17 @@ class AnalogsView extends StatefulWidget {
 }
 
 class _AnalogsViewState extends State<AnalogsView> {
-  List<AnalogState> _analogStates = List();
+  List<AnalogState> _analogStates = [];
   bool _analogStatesLock = false;
   Timer refreshTimer;
   int updateCount = 0;
   bool locked = false;
-  List<String> ignoreAnalogNames = List();
+  List<String> ignoreAnalogNames = [];
 
   @override
   void initState() {
     super.initState();
-    ignoreAnalogNames = List();
+    ignoreAnalogNames = [];
     if (!locked) freeList();
     update();
   }
@@ -70,7 +70,7 @@ class _AnalogsViewState extends State<AnalogsView> {
 
           // apply new list
           _analogStatesLock = true;
-          List<AnalogState> newList = List();
+          List<AnalogState> newList = [];
           for (var newState in stateList) {
             if (newState.active) locked = true;
             if (!ignoreAnalogNames.contains(newState.name))
@@ -88,7 +88,7 @@ class _AnalogsViewState extends State<AnalogsView> {
         }).whenComplete(() => con.free());
       }, onError: (e) {
         // clear list on disconnect
-        _analogStates = List();
+        _analogStates = [];
       }).whenComplete(() => updateCount--);
     }
   }

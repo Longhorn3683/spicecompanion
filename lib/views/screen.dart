@@ -118,45 +118,68 @@ class _ScreenViewState extends State<ScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: NeverScrollableScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          systemOverlayStyle: getSystemUiOverlayStyle(context),
-          title: Text(getViewName(SpiceView.Screen)),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: () {
-                screensViewNo.value++;
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.screenshot_monitor),
-              onPressed: () async {
-                var dir = await getApplicationDocumentsDirectory();
-                String name =
-                    'SpiceCapture_${DateTime.now().toString().replaceAll('-', '').replaceAll(':', '').replaceAll(' ', '').replaceAll('.', '')}';
-                var file = File("${dir.path}/$name.jpg");
+    return Listener(
+      onPointerDown: (p) {
+        if (p.position.dy < MediaQuery.of(context).padding.top + 16) {
+          setState(() {
+            toolbarHidden = false;
+          });
+        }
+      },
+      child: CustomScrollView(
+        physics: NeverScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            toolbarHeight: toolbarHidden ? 0 : kToolbarHeight,
+            systemOverlayStyle: getSystemUiOverlayStyle(context),
+            title: Text(getViewName(SpiceView.Screen)),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.autorenew),
+                onPressed: () {
+                  screensViewNo.value++;
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.screenshot_monitor),
+                onPressed: () async {
+                  var dir = await getApplicationDocumentsDirectory();
+                  String name =
+                      'SpiceCapture_${DateTime.now().toString().replaceAll('-', '').replaceAll(':', '').replaceAll(' ', '').replaceAll('.', '')}';
+                  var file = File("${dir.path}/$name.jpg");
 
-                ConnectionPool.inst.get().then((con) {
-                  captureGetJPG(con,
-                          screen: screensCaptureNo, divide: 1, quality: 100)
-                      .then((capture) async {
-                    await file.writeAsBytes(
-                        capture.data.toList(growable: false),
-                        flush: true);
-                    await GallerySaver.saveImage(file.path);
-                    await Share.shareFiles(<String>[file.path],
-                        mimeTypes: <String>["image/jpeg"]);
-                  }).whenComplete(() {
-                    file.deleteSync();
-                    con.free();
+                  ConnectionPool.inst.get().then((con) {
+                    captureGetJPG(con,
+                            screen: screensCaptureNo, divide: 1, quality: 100)
+                        .then((capture) async {
+                      await file.writeAsBytes(
+                          capture.data.toList(growable: false),
+                          flush: true);
+                      await GallerySaver.saveImage(file.path);
+                      await Share.shareFiles(<String>[file.path],
+                          mimeTypes: <String>["image/jpeg"]);
+                    }).whenComplete(() {
+                      file.deleteSync();
+                      con.free();
+                    });
                   });
-                });
-              },
-            ),
-            /*IconButton(
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.expand_less),
+                onPressed: () {
+                  setState(() {
+                    toolbarHidden = !toolbarHidden;
+                  });
+                  if (toolbarHidden == true) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(S.current.tap_to_show_bar),
+                      duration: Duration(seconds: 1),
+                    ));
+                  }
+                },
+              ),
+              /*IconButton(
               icon: Icon(Icons.settings),
               onPressed: () {
                 showDialog(
@@ -230,80 +253,83 @@ class _ScreenViewState extends State<ScreenView> {
                 );
               },
             ),*/
-          ],
-        ),
-        SliverFillRemaining(
-          child: () {
-            var image = captureImage;
-            if (image != null) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: image.width / image.height,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: () {
-                        RenderBox rb = context.findRenderObject() as RenderBox;
-                        Size rbSize = rb?.size ?? Size(1280, 720);
-                        var divide = Settings.screenDivide.toInt();
+            ],
+          ),
+          SliverFillRemaining(
+            child: () {
+              var image = captureImage;
+              if (image != null) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: image.width / image.height,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: () {
+                          RenderBox rb =
+                              context.findRenderObject() as RenderBox;
+                          Size rbSize = rb?.size ?? Size(1280, 720);
+                          var divide = Settings.screenDivide.toInt();
 
-                        // get padding
-                        double padX = 0;
-                        double padY = 0;
-                        double imageAspect = image.width / image.height;
-                        double boxAspect = rbSize.width / rbSize.height;
-                        if (imageAspect > boxAspect) {
-                          padY = rbSize.height - rbSize.width / imageAspect;
-                        }
-                        if (imageAspect < boxAspect) {
-                          padX = rbSize.width - imageAspect * rbSize.height;
-                        }
+                          // get padding
+                          double padX = 0;
+                          double padY = 0;
+                          double imageAspect = image.width / image.height;
+                          double boxAspect = rbSize.width / rbSize.height;
+                          if (imageAspect > boxAspect) {
+                            padY = rbSize.height - rbSize.width / imageAspect;
+                          }
+                          if (imageAspect < boxAspect) {
+                            padX = rbSize.width - imageAspect * rbSize.height;
+                          }
 
-                        // get scale
-                        double horScale = image.width / (rbSize.width - padX);
-                        double verScale = image.height / (rbSize.height - padY);
-                        horScale *= divide;
-                        verScale *= divide;
+                          // get scale
+                          double horScale = image.width / (rbSize.width - padX);
+                          double verScale =
+                              image.height / (rbSize.height - padY);
+                          horScale *= divide;
+                          verScale *= divide;
 
-                        return Listener(
-                          onPointerDown: (p) {
-                            var pos = Offset(p.position.dx - padX * 0.5,
-                                p.position.dy - padY * 0.5);
-                            var local = rb.globalToLocal(pos);
-                            int touchX = (local.dx * horScale).toInt();
-                            int touchY = (local.dy * verScale).toInt();
-                            updateTouch(p.pointer, touchX, touchY, true);
-                          },
-                          onPointerMove: (p) {
-                            var pos = Offset(p.position.dx - padX * 0.5,
-                                p.position.dy - padY * 0.5);
-                            var local = rb.globalToLocal(pos);
-                            int touchX = (local.dx * horScale).toInt();
-                            int touchY = (local.dy * verScale).toInt();
-                            updateTouch(p.pointer, touchX, touchY, true);
-                          },
-                          onPointerUp: (p) {
-                            updateTouch(p.pointer, 0, 0, false);
-                          },
-                          onPointerCancel: (p) {
-                            updateTouch(p.pointer, 0, 0, false);
-                          },
-                          child: image,
-                        );
-                      }(),
+                          return Listener(
+                            onPointerDown: (p) {
+                              var pos = Offset(p.position.dx - padX * 0.5,
+                                  p.position.dy - padY * 0.5);
+                              var local = rb.globalToLocal(pos);
+                              int touchX = (local.dx * horScale).toInt();
+                              int touchY = (local.dy * verScale).toInt();
+                              updateTouch(p.pointer, touchX, touchY, true);
+                            },
+                            onPointerMove: (p) {
+                              var pos = Offset(p.position.dx - padX * 0.5,
+                                  p.position.dy - padY * 0.5);
+                              var local = rb.globalToLocal(pos);
+                              int touchX = (local.dx * horScale).toInt();
+                              int touchY = (local.dy * verScale).toInt();
+                              updateTouch(p.pointer, touchX, touchY, true);
+                            },
+                            onPointerUp: (p) {
+                              updateTouch(p.pointer, 0, 0, false);
+                            },
+                            onPointerCancel: (p) {
+                              updateTouch(p.pointer, 0, 0, false);
+                            },
+                            child: image,
+                          );
+                        }(),
+                      ),
                     ),
                   ),
-                ),
+                );
+              }
+              return Padding(
+                padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                child: Center(child: Text(S.current.no_screen)),
               );
-            }
-            return Padding(
-              padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-              child: Center(child: Text(S.current.no_screen)),
-            );
-          }(),
-        ),
-      ],
+            }(),
+          ),
+        ],
+      ),
     );
   }
 }
