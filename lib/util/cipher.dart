@@ -6,7 +6,7 @@ class CardCipher {
 
   static String encode(String cardID) {
     // check length
-    if (cardID.length != 16) throw new Exception("cardID must be of length 16");
+    if (cardID.length != 16) throw Exception("cardID must be of length 16");
 
     // capitalize
     cardID = cardID.toUpperCase();
@@ -22,12 +22,16 @@ class CardCipher {
 
     // convert to 5 bit
     final List<int> bits = List<int>(65);
-    for (int i = 0; i < 64; i++) bits[i] = (cipher[i >> 3] >> (~i & 7)) & 1;
+    for (int i = 0; i < 64; i++) {
+      bits[i] = (cipher[i >> 3] >> (~i & 7)) & 1;
+    }
     bits[64] = 0;
     final List<int> parts = List<int>(16);
     for (int i = 0; i < 13; i++) {
       parts[i] = 0;
-      for (int n = 0; n < 5; n++) parts[i] |= bits[i * 5 + n] << 4 - n;
+      for (int n = 0; n < 5; n++) {
+        parts[i] |= bits[i * 5 + n] << 4 - n;
+      }
     }
 
     // get card type
@@ -36,7 +40,9 @@ class CardCipher {
     // make it 14 parts
     parts[0] ^= cardType;
     parts[13] = 1;
-    for (int i = 1; i < 14; i++) parts[i] ^= parts[i - 1];
+    for (int i = 1; i < 14; i++) {
+      parts[i] ^= parts[i - 1];
+    }
 
     // special fields
     parts[14] = cardType;
@@ -45,7 +51,9 @@ class CardCipher {
 
     // build string
     String cipherText = "";
-    for (int i = 0; i < 16; i++) cipherText += CIPHER_CHARS[parts[i]];
+    for (int i = 0; i < 16; i++) {
+      cipherText += CIPHER_CHARS[parts[i]];
+    }
 
     // return cipher text
     return cipherText;
@@ -63,11 +71,12 @@ class CardCipher {
     cipher = cipher.replaceAll("I", "1");
 
     // check length
-    if (cipher.length != 16)
-      throw new Exception("Cipher not of length 16: " + cipher);
+    if (cipher.length != 16) {
+      throw Exception("Cipher not of length 16: $cipher");
+    }
 
     // convert to parts
-    List<int> parts = new List<int>(16);
+    List<int> parts = List<int>(16);
     for (int offset = 0; offset < 16; offset++) {
       // get character
       String c = cipher[offset];
@@ -82,27 +91,35 @@ class CardCipher {
       }
 
       // character not found
-      if (value < 0) throw new Exception("Invalid card cipher character: " + c);
+      if (value < 0) throw Exception("Invalid card cipher character: $c");
 
       // save value
       parts[offset] = value;
     }
 
     // convert to 13 parts
-    for (int i = 13; i > 0; i--) parts[i] ^= parts[i - 1];
+    for (int i = 13; i > 0; i--) {
+      parts[i] ^= parts[i - 1];
+    }
     parts[0] ^= parts[14];
 
     // convert to bits
-    List<int> bits = new List<int>(64);
-    for (int i = 0; i < 64; i++) bits[i] = (parts[i ~/ 5] >> (4 - (i % 5))) & 1;
+    List<int> bits = List<int>(64);
+    for (int i = 0; i < 64; i++) {
+      bits[i] = (parts[i ~/ 5] >> (4 - (i % 5))) & 1;
+    }
 
     // pack into bytes
-    List<int> cipherBytes = new List<int>(8);
-    for (int i = 0; i < 8; i++) cipherBytes[i] = 0;
-    for (int i = 0; i < 64; i++) cipherBytes[i ~/ 8] |= bits[i] << (~i & 7);
+    List<int> cipherBytes = List<int>(8);
+    for (int i = 0; i < 8; i++) {
+      cipherBytes[i] = 0;
+    }
+    for (int i = 0; i < 64; i++) {
+      cipherBytes[i ~/ 8] |= bits[i] << (~i & 7);
+    }
 
     // decipher
-    List<int> decipheredBytes = new List<int>(cipherBytes.length);
+    List<int> decipheredBytes = List<int>(cipherBytes.length);
     unpack(decipheredBytes, cipher1(0x40, pack(cipherBytes)));
     unpack(decipheredBytes, cipher2(0x20, pack(decipheredBytes)));
     unpack(decipheredBytes, cipher1(0x00, pack(decipheredBytes)));
@@ -191,14 +208,17 @@ class CardCipher {
   static int card_type(String cardID) {
     if (cardID.startsWith("E0")) return 1;
     if (cardID.startsWith("01")) return 2;
-    throw new Exception("Unknown card type: " + cardID);
+    throw Exception("Unknown card type: $cardID");
   }
 
   static int checksum(List<int> buffer) {
     int chk = 0;
-    for (int i = 0; i < buffer.length; i++)
+    for (int i = 0; i < buffer.length; i++) {
       chk += (i % 3 + 1) * (buffer[i] & 0xFF);
-    while (chk >= 0x20) chk = (chk & 0x1F) + (chk >> 5);
+    }
+    while (chk >= 0x20) {
+      chk = (chk & 0x1F) + (chk >> 5);
+    }
     return chk & 0xFF;
   }
 

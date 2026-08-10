@@ -8,7 +8,7 @@ configured.
 Powered by Flutter 3.7
 
 ## Features
-- Support Android, iOS (include Mac with Apple Chip), HarmonyOS, Windows (other platform coming soon)
+- Support Android, iOS, HarmonyOS, Windows, macOS
 - Game status overview
 - Quick Screenshot (Save to companion device, different from PrtScr on spice2x)
 - Manage and insert cards
@@ -22,18 +22,21 @@ Powered by Flutter 3.7
 - Dark mode
 
 ## Requirements
-- SpiceTools
+- spice2x
 ### OS
 - Android 5.0+
 - iOS 15.0+
 - HarmonyOS 5.0.0+
 - Windows 10+
+- macOS 10.14+
 
-## iOS and HarmonyOS
-iOS and HarmonyOS packages were unsigned. Use sideload tools to install.
+## iOS, macOS and HarmonyOS
+iOS, macOS and HarmonyOS packages were unsigned.
 - iOS: [Sideloadly](https://sideloadly.io)
 - HarmonyOS: [小白调试助手](https://github.com/likuai2010/auto-installer)
-- macOS (arm64): [PlayCover](https://playcover.io) (remember to remove PlayTools).
+
+## Linux and Web
+Currently no plan to support
 
 ## How to use with spice2x
 1. Open spicecfg.exe
@@ -44,12 +47,8 @@ iOS and HarmonyOS packages were unsigned. Use sideload tools to install.
 
 If firewall window appears, please click 'Allow'.
 
-After
-you've done that, add your server in the app, connect to it, and you're good
-to go!
+After you've done that, add your server in the app, connect to it, and you're good to go!
 
-You can also use `-api` and
-`-apipass` parameters with your desired port and password, respectively. 
+You can also use `-api` and `-apipass` parameters with your desired port and password, respectively. 
 
-Example usage of the parameters:
-`-api 1337 -apipass changeme`
+Example usage of the parameters: `-api 1337 -apipass changeme`

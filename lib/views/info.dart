@@ -1,6 +1,8 @@
 part of views;
 
 class InfoView extends StatefulWidget {
+  const InfoView({Key key}) : super(key: key);
+
   @override
   _InfoViewState createState() => _InfoViewState();
 }
@@ -9,7 +11,7 @@ class _InfoViewState extends State<InfoView> {
   Timer updateTimer;
   bool updateLock = false;
 
-  String _disconnectMsg = S.current.disconnected;
+  final String _disconnectMsg = S.current.disconnected;
   String _avsModel = '';
   String _avsDest = '';
   String _avsSpec = '';
@@ -38,7 +40,7 @@ class _InfoViewState extends State<InfoView> {
   _InfoViewState() {
     if (updateTimer != null) updateTimer.cancel();
     updateTimer = Timer.periodic(
-        Duration(
+        const Duration(
           seconds: 1,
         ),
         infoTimerTick);
@@ -51,8 +53,7 @@ class _InfoViewState extends State<InfoView> {
   void initState() {
     super.initState();
 
-    // subscribe to tag input
-    this.cardSubscription = TagManager.inst.tagStream.stream.listen((id) {
+    cardSubscription = TagManager.inst.tagStream.stream.listen((id) {
       insertCardID(id);
     });
   }
@@ -60,7 +61,7 @@ class _InfoViewState extends State<InfoView> {
   @override
   void dispose() {
     if (updateTimer != null) updateTimer.cancel();
-    if (this.cardSubscription != null) this.cardSubscription.cancel();
+    if (cardSubscription != null) cardSubscription.cancel();
     super.dispose();
   }
 
@@ -68,7 +69,7 @@ class _InfoViewState extends State<InfoView> {
     if (updateLock) return;
     updateLock = true;
     ConnectionPool.inst.get().then((con) {
-      var respAVS, respLauncher;
+      Map respAVS, respLauncher;
 
       return infoAVS(con).then((avs) {
         respAVS = avs;
@@ -98,13 +99,14 @@ class _InfoViewState extends State<InfoView> {
             try {
               _launcherSystemTime =
                   DateTime.parse((respLauncher['system_time'] ?? "") as String);
-            } catch (FormatException) {
+            } on FormatException {
               _launcherSystemTime = null;
             }
-            if (respLauncher['args'] != null)
+            if (respLauncher['args'] != null) {
               _launcherArgs = (respLauncher['args'] as List).cast<String>();
-            else
+            } else {
               _launcherArgs = [""];
+            }
 
             _memTotal = memory['mem_total'] ?? 1;
             _memTotalUsed = memory['mem_total_used'] ?? 0;
@@ -150,7 +152,8 @@ class _InfoViewState extends State<InfoView> {
         systemOverlayStyle: getSystemUiOverlayStyle(context),
         actions: [
           IconButton(
-            icon: Icon(Icons.screenshot_monitor),
+            tooltip: S.current.screenshot,
+            icon: const Icon(Icons.camera_alt),
             onPressed: () async {
               var dir = await getApplicationDocumentsDirectory();
               String name =
@@ -166,17 +169,13 @@ class _InfoViewState extends State<InfoView> {
                     .then((capture) async {
                   await file.writeAsBytes(capture.data.toList(growable: false),
                       flush: true);
-                  if (Platform.isAndroid ||
-                      Platform.isIOS ||
-                      defaultTargetPlatform == TargetPlatform.ohos) {
-                    await GallerySaver.saveImage(file.path);
-                    await Share.shareFiles(<String>[file.path],
-                        mimeTypes: <String>["image/jpeg"]);
-                  } else if (Platform.isWindows ||
-                      Platform.isMacOS ||
-                      Platform.isLinux) {
-                    launchUrl(Uri.parse('file:///${file.path}'));
-                  }
+                  await Navigator.push(
+                      context,
+                      DialogRoute(
+                          context: context,
+                          barrierColor: Colors.transparent,
+                          builder: (context) =>
+                              PhotoViewPage(name, file.path)));
                 }).whenComplete(() {
                   if (Platform.isAndroid ||
                       Platform.isIOS ||
@@ -188,9 +187,14 @@ class _InfoViewState extends State<InfoView> {
               }, onError: (err) {
                 // show error
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  width: 300,
                   content: Text(S.current.connect_a_server),
-                  backgroundColor: Colors.deepOrange,
-                  duration: Duration(seconds: 1),
+                  backgroundColor: Colors.red,
+                  showCloseIcon: true,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24.0),
+                  ),
                 ));
               });
             },
@@ -202,6 +206,7 @@ class _InfoViewState extends State<InfoView> {
               Widget child,
             ) {
               return IconButton(
+                tooltip: S.current.insert_coin,
                 icon: const Icon(Icons.monetization_on),
                 onPressed: () {
                   if (controller.isOpen) {
@@ -246,6 +251,7 @@ class _InfoViewState extends State<InfoView> {
               Widget child,
             ) {
               return IconButton(
+                tooltip: S.current.game_menu,
                 icon: const Icon(Icons.power_settings_new),
                 onPressed: () {
                   if (controller.isOpen) {
@@ -258,7 +264,7 @@ class _InfoViewState extends State<InfoView> {
             },
             menuChildren: [
               MenuItemButton(
-                leadingIcon: Icon(Icons.restart_alt),
+                leadingIcon: const Icon(Icons.restart_alt),
                 child: Text(S.current.restart_game),
                 onPressed: () => showDialog(
                   context: context,
@@ -286,7 +292,7 @@ class _InfoViewState extends State<InfoView> {
                 ),
               ),
               MenuItemButton(
-                leadingIcon: Icon(Icons.close),
+                leadingIcon: const Icon(Icons.close),
                 child: Text(S.current.quit_game),
                 onPressed: () => showDialog(
                   context: context,
@@ -314,9 +320,9 @@ class _InfoViewState extends State<InfoView> {
                   },
                 ),
               ),
-              Divider(),
+              const Divider(),
               MenuItemButton(
-                leadingIcon: Icon(Icons.restart_alt),
+                leadingIcon: const Icon(Icons.restart_alt),
                 child: Text(S.current.restart),
                 onPressed: () => showDialog(
                   context: context,
@@ -344,7 +350,7 @@ class _InfoViewState extends State<InfoView> {
                 ),
               ),
               MenuItemButton(
-                leadingIcon: Icon(Icons.power_settings_new),
+                leadingIcon: const Icon(Icons.power_settings_new),
                 child: Text(S.current.shutdown),
                 onPressed: () => showDialog(
                   context: context,
@@ -377,7 +383,7 @@ class _InfoViewState extends State<InfoView> {
         pinned: true,
       ),
       SliverPadding(
-        padding: EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         sliver: SliverList(
           delegate: SliverChildListDelegate(
             [
@@ -386,7 +392,7 @@ class _InfoViewState extends State<InfoView> {
                 spacing: 4,
                 children: [
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 400),
+                    constraints: const BoxConstraints(maxWidth: 400),
                     child: Column(
                       children: [
                         StatefulBuilder(
@@ -395,8 +401,9 @@ class _InfoViewState extends State<InfoView> {
 
                             void nextMode() {
                               currentMode = (currentMode + 1) % 2;
-                              if (getPlayerCount(gameModel) <= 1)
+                              if (getPlayerCount(gameModel) <= 1) {
                                 currentMode = 0;
+                              }
                               cardState(() {});
                             }
 
@@ -411,32 +418,43 @@ class _InfoViewState extends State<InfoView> {
                                 color: getModeColor(),
                                 clipBehavior: Clip.antiAlias,
                                 child: ListTile(
-                                    contentPadding: EdgeInsets.symmetric(
+                                    contentPadding: const EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 8),
                                     trailing: IconButton(
-                                      icon: Text(
-                                        'P${currentMode + 1}',
-                                        style: TextStyle(fontSize: 24),
+                                      icon: AspectRatio(
+                                        aspectRatio: 1,
+                                        child: Center(
+                                          child: Text(
+                                            'P${currentMode + 1}',
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                          ),
+                                        ),
                                       ),
                                       onPressed: () {
                                         nextMode();
                                       },
                                     ),
-                                    title: Text(S.current.swipe_card),
-                                    subtitle:
-                                        Text(S.current.or_select_in_cards),
+                                    title: Text(S.current.insert_card,
+                                        style: const TextStyle(fontSize: 24)),
                                     onTap: () async {
                                       // check if cards are loaded
                                       if (!cardListLoaded) await cardListLoad();
 
                                       // check if cards are defined
-                                      if (cardList.length == 0) {
+                                      if (cardList.isEmpty) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
+                                          width: 300,
                                           content:
                                               Text(S.current.add_cards_first),
                                           backgroundColor: Colors.red,
-                                          duration: Duration(milliseconds: 500),
+                                          duration: const Duration(seconds: 1),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(24.0),
+                                          ),
                                         ));
                                         return;
                                       }
@@ -455,7 +473,7 @@ class _InfoViewState extends State<InfoView> {
                                         // show card selection dialog
                                         card = await showDialog(
                                             context: context,
-                                            builder: (BuildContext context) {
+                                            builder: (context) {
                                               return SimpleDialog(
                                                 clipBehavior: Clip.antiAlias,
                                                 title:
@@ -490,7 +508,7 @@ class _InfoViewState extends State<InfoView> {
                             );
                           },
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         // AVS
                         Card(
                           shape: const RoundedRectangleBorder(
@@ -500,44 +518,44 @@ class _InfoViewState extends State<InfoView> {
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             title: Text(_gameServer),
                             subtitle: Text('$_avsTitle\n$_avsServices'),
                             onTap: () => showModalBottomSheet(
                                 context: context,
                                 clipBehavior: Clip.antiAlias,
-                                builder: (context) => ServerView()),
+                                builder: (context) => const ServerView()),
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         // Memory Usage
                         Row(
                           children: [
                             Expanded(
-                              child: _createMemoryDisplay(
-                                  'RAM', _memUsed, _memTotalUsed, _memTotal),
+                              child: _createMemoryDisplay('RAM', _memUsed,
+                                  _memTotalUsed, _memTotal, context),
                             ),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Expanded(
                               child: _createMemoryDisplay('Swap', _vmemUsed,
-                                  _vmemTotalUsed, _vmemTotal),
+                                  _vmemTotalUsed, _vmemTotal, context),
                             ),
                           ],
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                       ],
                     ),
                   ),
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 400),
+                    constraints: const BoxConstraints(maxWidth: 400),
                     child: Column(
                       children: [
                         // Launcher Info
                         _createCard('spice2x',
-                            '${_launcherVersion}\n${_launcherCompileDate != null ? _getDateTimeFromGCC(_launcherCompileDate, _launcherCompileTime) : _disconnectMsg}'),
+                            '$_launcherVersion\n${_launcherCompileDate != null ? _getDateTimeFromGCC(_launcherCompileDate, _launcherCompileTime) : _disconnectMsg}'),
 
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
 
                         _createCard(
                             S.current.system_time,
@@ -546,7 +564,7 @@ class _InfoViewState extends State<InfoView> {
                                     _launcherSystemTime.toLocal())
                                 : _disconnectMsg),
 
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
 
                         Card(
                           shape: const RoundedRectangleBorder(
@@ -558,7 +576,7 @@ class _InfoViewState extends State<InfoView> {
                           child: Column(
                             children: [
                               ListTile(
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 8),
                                 title: Text(
                                     '${S.current.launch_args} (${_launcherArgs.length - 1})'),
@@ -566,19 +584,19 @@ class _InfoViewState extends State<InfoView> {
                               ListView(
                                 shrinkWrap: true,
                                 padding: EdgeInsets.zero,
-                                physics: NeverScrollableScrollPhysics(),
+                                physics: const NeverScrollableScrollPhysics(),
                                 children: _getArgList(_launcherArgs),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                       ],
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: kBottomNavigationBarHeight),
+              const SizedBox(height: kBottomNavigationBarHeight),
             ],
           ),
         ),
@@ -602,9 +620,14 @@ class _InfoViewState extends State<InfoView> {
     ConnectionPool.inst.get().then((con) {
       // show info
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text("${S.current.card_inserting}: $id"),
         backgroundColor: getModeColor(),
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
 
       // insert card
@@ -614,9 +637,14 @@ class _InfoViewState extends State<InfoView> {
     }, onError: (err) {
       // show error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text(S.current.connect_a_server),
-        backgroundColor: Colors.deepOrange,
-        duration: Duration(seconds: 1),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
     });
   }
@@ -648,10 +676,11 @@ List<Widget> _getArgList(List<String> args) {
     if (infoArgsLookup.containsKey(args[i])) {
       desc = infoArgsLookup[args[i]];
     } else {
-      if (args[i].startsWith('-'))
+      if (args[i].startsWith('-')) {
         desc = 'Unknown Argument ${args[i]}';
-      else
+      } else {
         desc = 'Game Binary';
+      }
     }
 
     list.add(
@@ -674,7 +703,7 @@ Widget _createCard(String title, String desc) {
     ),
     clipBehavior: Clip.antiAlias,
     child: ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       title: Text(title),
       subtitle: Text(desc),
     ),
@@ -685,8 +714,8 @@ Widget _createCard(String title, String desc) {
 String _getMiB(num bytes) => (bytes * 9.53674e-7).toStringAsFixed(2);
 String _getGiB(num bytes) => (bytes * 9.31323e-10).toStringAsFixed(2);
 
-Widget _createMemoryDisplay(
-    String name, num used, num usedOutOfTotal, num total) {
+Widget _createMemoryDisplay(String name, num used, num usedOutOfTotal,
+    num total, BuildContext context) {
   return Card(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(
@@ -698,11 +727,15 @@ Widget _createMemoryDisplay(
         AspectRatio(
           aspectRatio: 1,
           child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   CircularProgressIndicator(
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .secondary
+                        .withOpacity(0.25),
                     value: usedOutOfTotal / total,
                     strokeWidth: 8,
                   ),
@@ -721,16 +754,16 @@ Widget _createMemoryDisplay(
         Text('${S.current.memory_game} ${_getMiB(used)}MiB',
             style: const TextStyle(fontSize: 14, color: Colors.lightGreen)),
         Text('${S.current.memory_used} ${_getGiB(usedOutOfTotal)}GiB',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.grey,
             )),
         Text('${S.current.memory_total} ${_getGiB(total)}GiB',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.grey,
             )),
-        SizedBox(
+        const SizedBox(
           height: 16,
         )
       ],

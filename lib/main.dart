@@ -4,12 +4,10 @@ import 'package:spicecompanion/views/views.dart';
 import 'package:spicecompanion/util/util.dart';
 
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart'
-    show debugDefaultTargetPlatformOverride;
 import 'package:window_manager/window_manager.dart';
 
 // desktop platform workaround for flutter
-void _setTargetPlatformForDesktop() {
+/*void _setTargetPlatformForDesktop() {
   TargetPlatform targetPlatform;
   if (Platform.isMacOS) {
     targetPlatform = TargetPlatform.iOS;
@@ -19,22 +17,24 @@ void _setTargetPlatformForDesktop() {
   if (targetPlatform != null) {
     debugDefaultTargetPlatformOverride = targetPlatform;
   }
-}
+}*/
 
 void main() async {
-  try {
+  /*try {
     _setTargetPlatformForDesktop();
-  } catch (e) {}
+  } catch (e) {}*/
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
-  WindowOptions windowOptions = WindowOptions(
-    size: Size(900, 600),
-    minimumSize: const Size(400, 300),
-  );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
+  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(900, 600),
+      minimumSize: Size(400, 300),
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -53,5 +53,5 @@ void main() async {
   TagManager.inst.start();
 
   // run app
-  runApp(MainView());
+  runApp(const MainView());
 }

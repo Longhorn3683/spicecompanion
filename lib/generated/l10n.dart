@@ -145,6 +145,16 @@ class S {
     );
   }
 
+  /// `Tap to connect to server`
+  String get tap_to_connect {
+    return Intl.message(
+      'Tap to connect to server',
+      name: 'tap_to_connect',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please connect to a server`
   String get connect_a_server {
     return Intl.message(
@@ -255,10 +265,10 @@ class S {
     );
   }
 
-  /// `Inserting Card`
+  /// `Inserting`
   String get card_inserting {
     return Intl.message(
-      'Inserting Card',
+      'Inserting',
       name: 'card_inserting',
       desc: '',
       args: [],
@@ -275,10 +285,10 @@ class S {
     );
   }
 
-  /// `Tip: Tap your card to the back of your phone.`
+  /// `Tip: If device supports NFC, you can enable NFC and tap cards with your device.`
   String get card_tap {
     return Intl.message(
-      'Tip: Tap your card to the back of your phone.',
+      'Tip: If device supports NFC, you can enable NFC and tap cards with your device.',
       name: 'card_tap',
       desc: '',
       args: [],
@@ -495,21 +505,11 @@ class S {
     );
   }
 
-  /// `Swipe card`
-  String get swipe_card {
+  /// `Insert your card`
+  String get insert_card {
     return Intl.message(
-      'Swipe card',
-      name: 'swipe_card',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `or tap to select in cards`
-  String get or_select_in_cards {
-    return Intl.message(
-      'or tap to select in cards',
-      name: 'or_select_in_cards',
+      'Insert your card',
+      name: 'insert_card',
       desc: '',
       args: [],
     );
@@ -1810,6 +1810,76 @@ class S {
     return Intl.message(
       'Disable debug message logging',
       name: 'args_dbghookdisable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saved to photos`
+  String get photo_saved {
+    return Intl.message(
+      'Saved to photos',
+      name: 'photo_saved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screen Always On`
+  String get screen_always_on {
+    return Intl.message(
+      'Screen Always On',
+      name: 'screen_always_on',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pure Black`
+  String get pure_black {
+    return Intl.message(
+      'Pure Black',
+      name: 'pure_black',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screenshot`
+  String get screenshot {
+    return Intl.message(
+      'Screenshot',
+      name: 'screenshot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insert Coin`
+  String get insert_coin {
+    return Intl.message(
+      'Insert Coin',
+      name: 'insert_coin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Game Menu`
+  String get game_menu {
+    return Intl.message(
+      'Game Menu',
+      name: 'game_menu',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch View`
+  String get switch_view {
+    return Intl.message(
+      'Switch View',
+      name: 'switch_view',
       desc: '',
       args: [],
     );

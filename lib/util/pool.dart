@@ -16,7 +16,7 @@ class ConnectionPool {
   static ConnectionPool inst = ConnectionPool();
 
   // the pool to limit the amount of concurrent connections
-  final _pool = new Pool(16, timeout: Duration(seconds: 3));
+  final _pool = Pool(16, timeout: const Duration(seconds: 3));
 
   // cache last connections
   final List<_ConnectionPoolEntry> _entries = [];
@@ -28,79 +28,75 @@ class ConnectionPool {
   String _pass = "";
 
   ConnectionPool() {
-    this.changes = StreamController<ConnectionPool>.broadcast();
+    changes = StreamController<ConnectionPool>.broadcast();
   }
 
   void dispose() {
-    this.changes.close();
-    this.changes = null;
-    this.clear();
+    changes.close();
+    changes = null;
+    clear();
   }
 
   bool isActive(String host, String port, String pass) {
-    return this._host == host
-        && this._port.toString() == port
-        && this._pass == pass;
+    return _host == host && _port.toString() == port && _pass == pass;
   }
 
   bool hasConnection() {
-    for (var entry in _entries)
+    for (var entry in _entries) {
       if (entry.con.isValid()) return true;
+    }
     return false;
   }
 
   bool hasPassword() {
-    return _pass != null && _pass.length > 0;
+    return _pass != null && _pass.isNotEmpty;
   }
 
   void disconnect() {
     _host = "";
     _port = 0;
     _pass = "";
-    this.clear();
-    this.changes.add(this);
+    clear();
+    changes.add(this);
   }
 
   void changeServer(String host, int port, String pass) {
-
     // check if unnecessary
-    if (_host == host && _port == port && _pass == pass)
-      return;
+    if (_host == host && _port == port && _pass == pass) return;
 
     // apply settings
-    this._host = host;
-    this._port = port;
-    this._pass = pass;
-    this.clear();
+    _host = host;
+    _port = port;
+    _pass = pass;
+    clear();
 
     // notify
-    if (this.changes != null)
-      this.changes.add(this);
+    if (changes != null) changes.add(this);
   }
 
   void clear() {
-
     // kill all connections
-    for (var entry in _entries) entry.con.dispose();
+    for (var entry in _entries) {
+      entry.con.dispose();
+    }
     _entries.clear();
   }
 
   Future<Connection> get() {
-
     // check host
-    if (_host.isEmpty) return Future<Connection>(() {
-      throw new StateError("Disconnected.");
-    });
+    if (_host.isEmpty) {
+      return Future<Connection>(() {
+        throw StateError("Disconnected.");
+      });
+    }
 
     // request connection
     return _pool.request().then((resource) async {
-
       // find free connection
       for (int i = 0; i < _entries.length;) {
         var entry = _entries[i++];
         if (entry.con.isFree()) {
           if (entry.con.isValid()) {
-
             // pass resource
             entry.con.resource = resource;
 
@@ -113,9 +109,7 @@ class ConnectionPool {
 
             // return connection
             return entry.con;
-
           } else {
-
             // dispose invalid connections
             entry.con.dispose();
             _entries.removeAt(i - 1);
@@ -126,8 +120,7 @@ class ConnectionPool {
       // create connection with pool resource
       var con = Connection(_host, _port, _pass, resource: resource);
       await con.onConnect();
-      if (con.isDisposed())
-        throw new APIError("disposed");
+      if (con.isDisposed()) throw APIError("disposed");
 
       // remember it so we can close/reuse it later
       _entries.add(_ConnectionPoolEntry(con));

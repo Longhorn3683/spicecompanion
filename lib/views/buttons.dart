@@ -1,6 +1,8 @@
 part of views;
 
 class ButtonsView extends StatefulWidget {
+  const ButtonsView({Key key}) : super(key: key);
+
   @override
   _ButtonsViewState createState() => _ButtonsViewState();
 }
@@ -37,7 +39,7 @@ class _ButtonsViewState extends State<ButtonsView> {
 
   Future<void> writeList() async {
     return ConnectionPool.inst.get().then((con) {
-      if (_buttonStates == null || _buttonStates.length == 0) return null;
+      if (_buttonStates == null || _buttonStates.isEmpty) return null;
       return buttonsWrite(con, _buttonStates).whenComplete(() => con.free());
     }, onError: (e) {});
   }
@@ -86,9 +88,9 @@ class _ButtonsViewState extends State<ButtonsView> {
   @override
   Widget build(BuildContext context) {
     // empty view
-    if (_buttonStates.length == 0)
+    if (_buttonStates.isEmpty) {
       return CustomScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
             systemOverlayStyle: getSystemUiOverlayStyle(context),
@@ -101,6 +103,7 @@ class _ButtonsViewState extends State<ButtonsView> {
           ),
         ],
       );
+    }
 
     // list view
     return CustomScrollView(
@@ -130,9 +133,11 @@ class _ButtonsViewState extends State<ButtonsView> {
           _buttonStates.map((button) {
             // desc
             var desc = button.state.toString();
-            if (button.state == 0)
+            if (button.state == 0) {
               desc = "Not Pressed";
-            else if (button.state == 1) desc = "Pressed";
+            } else if (button.state == 1) {
+              desc = "Pressed";
+            }
 
             // desc color
             var descColor = Colors.red;
@@ -145,17 +150,18 @@ class _ButtonsViewState extends State<ButtonsView> {
               title: Text(button.name, style: TextStyle(color: titleColor)),
               subtitle: Text(desc, style: TextStyle(color: descColor)),
               onTap: () async {
-                if (button.state >= 0.5)
+                if (button.state >= 0.5) {
                   button.state = 0;
-                else
+                } else {
                   button.state = 1;
+                }
                 await writeSingle(button);
                 setState(() {});
               },
             );
           }).toList(),
         )),
-        SliverPadding(
+        const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );

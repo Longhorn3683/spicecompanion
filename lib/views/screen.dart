@@ -4,6 +4,8 @@ final screensViewNo = ValueNotifier<int>(1);
 var screensCaptureNo = 0;
 
 class ScreenView extends StatefulWidget {
+  const ScreenView({Key key}) : super(key: key);
+
   @override
   _ScreenViewState createState() => _ScreenViewState();
 }
@@ -14,7 +16,7 @@ class _ScreenViewState extends State<ScreenView> {
   bool captureActive = false;
   List<int> captureScreens = [];
   TouchControl touchControl = TouchControl();
-  Map touchPoints = Map();
+  Map touchPoints = {};
 
   @override
   void initState() {
@@ -49,7 +51,7 @@ class _ScreenViewState extends State<ScreenView> {
     ConnectionPool.inst.get().then((con) async {
       if (!captureActive || captureScreens.isEmpty) {
         con.free();
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
         return;
       }
       var quality = Settings.screenQuality.toInt();
@@ -88,7 +90,7 @@ class _ScreenViewState extends State<ScreenView> {
       // connection fail
     }).whenComplete(() async {
       if (captureActive) {
-        await Future.delayed(Duration(milliseconds: 1));
+        await Future.delayed(const Duration(milliseconds: 1));
         update();
       }
     });
@@ -127,7 +129,7 @@ class _ScreenViewState extends State<ScreenView> {
         }
       },
       child: CustomScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar(
             toolbarHeight: toolbarHidden ? 0 : kToolbarHeight,
@@ -135,18 +137,17 @@ class _ScreenViewState extends State<ScreenView> {
             title: Text(getViewName(SpiceView.Screen)),
             actions: <Widget>[
               IconButton(
-                icon: Icon(Icons.autorenew),
-                onPressed: () {
-                  screensViewNo.value++;
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.screenshot_monitor),
+                tooltip: S.current.screenshot,
+                icon: const Icon(Icons.camera_alt),
                 onPressed: () async {
                   var dir = await getApplicationDocumentsDirectory();
                   String name =
                       'SpiceCapture_${DateTime.now().toString().replaceAll('-', '').replaceAll(':', '').replaceAll(' ', '').replaceAll('.', '')}';
-                  var file = File("${dir.path}/$name.jpg");
+                  var screenshots = Directory('${dir.path}/Spice L3');
+                  if (!screenshots.existsSync()) {
+                    await screenshots.create();
+                  }
+                  var file = File("${screenshots.path}/$name.jpg");
 
                   ConnectionPool.inst.get().then((con) {
                     captureGetJPG(con,
@@ -155,26 +156,58 @@ class _ScreenViewState extends State<ScreenView> {
                       await file.writeAsBytes(
                           capture.data.toList(growable: false),
                           flush: true);
-                      await GallerySaver.saveImage(file.path);
-                      await Share.shareFiles(<String>[file.path],
-                          mimeTypes: <String>["image/jpeg"]);
+                      await Navigator.push(
+                          context,
+                          DialogRoute(
+                              context: context,
+                              barrierColor: Colors.transparent,
+                              builder: (context) =>
+                                  PhotoViewPage(name, file.path)));
                     }).whenComplete(() {
-                      file.deleteSync();
+                      if (Platform.isAndroid ||
+                          Platform.isIOS ||
+                          defaultTargetPlatform == TargetPlatform.ohos) {
+                        file.deleteSync();
+                      }
                       con.free();
                     });
+                  }, onError: (err) {
+                    // show error
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      width: 300,
+                      content: Text(S.current.connect_a_server),
+                      backgroundColor: Colors.red,
+                      showCloseIcon: true,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    ));
                   });
                 },
               ),
               IconButton(
-                icon: Icon(Icons.expand_less),
+                tooltip: S.current.switch_view,
+                icon: const Icon(Icons.autorenew),
+                onPressed: () {
+                  screensViewNo.value++;
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.expand_less),
                 onPressed: () {
                   setState(() {
                     toolbarHidden = !toolbarHidden;
                   });
                   if (toolbarHidden == true) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      width: 300,
                       content: Text(S.current.tap_to_show_bar),
-                      duration: Duration(seconds: 1),
+                      duration: const Duration(seconds: 1),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
                     ));
                   }
                 },
@@ -260,7 +293,8 @@ class _ScreenViewState extends State<ScreenView> {
               var image = captureImage;
               if (image != null) {
                 return Padding(
-                  padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                  padding:
+                      const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
                   child: Center(
                     child: AspectRatio(
                       aspectRatio: image.width / image.height,
@@ -269,7 +303,7 @@ class _ScreenViewState extends State<ScreenView> {
                         child: () {
                           RenderBox rb =
                               context.findRenderObject() as RenderBox;
-                          Size rbSize = rb?.size ?? Size(1280, 720);
+                          Size rbSize = rb?.size ?? const Size(1280, 720);
                           var divide = Settings.screenDivide.toInt();
 
                           // get padding
@@ -323,7 +357,8 @@ class _ScreenViewState extends State<ScreenView> {
                 );
               }
               return Padding(
-                padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                padding:
+                    const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
                 child: Center(child: Text(S.current.no_screen)),
               );
             }(),

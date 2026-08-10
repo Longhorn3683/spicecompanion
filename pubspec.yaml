@@ -2,7 +2,7 @@ name: spicecompanion
 description: A fork of spicecompanion project
 publish_to: none
 
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -41,6 +41,13 @@ dependencies:
       url: "https://gitcode.com/CPF-Flutter/flutter_packages.git"
       path: "packages/url_launcher/url_launcher"
       ref: url_launcher_v6.1.11-ohos-1.0.1
+  extended_image: ^7.0.2
+  wakelock_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_wakelock_plus.git
+      path: wakelock_plus
+      ref: 1.1.4-ohos.1.0.0-beta.1
+  wakelock_plus_platform_interface: ^1.1.0
 
 dependency_overrides:
   path_provider:
@@ -49,7 +56,8 @@ dependency_overrides:
       path: packages/path_provider/path_provider
       ref: provider-v2.1.1-ohos-1.0.1
 
-dev_dependencies:
+dev_dependencies: 
+  flutter_lints: ^2.0.3
   #flutter_test:
   #  sdk: flutter
 

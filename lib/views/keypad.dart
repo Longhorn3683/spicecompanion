@@ -65,7 +65,7 @@ class _KeypadButton extends StatelessWidget {
                       TextStyle(fontSize: fontSize ?? 42.0, color: fontColor)),
             ),
             onTap: () {
-              if (this._cb != null) this._cb(_key);
+              if (_cb != null) _cb(_key);
             }),
       ),
     );
@@ -73,6 +73,8 @@ class _KeypadButton extends StatelessWidget {
 }
 
 class KeypadView extends StatefulWidget {
+  const KeypadView({Key key}) : super(key: key);
+
   @override
   _KeypadViewState createState() => _KeypadViewState();
 }
@@ -160,11 +162,16 @@ class _KeypadViewState extends State<KeypadView> {
     if (!cardListLoaded) await cardListLoad();
 
     // check if cards are defined
-    if (cardList.length == 0) {
+    if (cardList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text(S.current.add_cards_first),
         backgroundColor: Colors.red,
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
       return;
     }
@@ -213,9 +220,14 @@ class _KeypadViewState extends State<KeypadView> {
     ConnectionPool.inst.get().then((con) {
       // show info
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text("${S.current.card_inserting}: $id"),
         backgroundColor: getModeColor(),
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
 
       // insert card
@@ -225,9 +237,14 @@ class _KeypadViewState extends State<KeypadView> {
     }, onError: (err) {
       // show error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text(S.current.connect_a_server),
-        backgroundColor: Colors.deepOrange,
-        duration: Duration(seconds: 1),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
     });
   }
@@ -251,21 +268,19 @@ class _KeypadViewState extends State<KeypadView> {
     if (keyBuffer.length < 8) keyBuffer += _keyLookup[key];
 
     // update
-    if (keyBuffer.length > 0) keyUpdate();
+    if (keyBuffer.isNotEmpty) keyUpdate();
   }
 
   void keyUpdate() {
-    if (keyBufferSend == null) {
-      keyBufferSend = ConnectionPool.inst.get().then((con) {
-        keypadsWrite(con, getModePlayer(), keyBuffer).whenComplete(() {
-          con.free();
-          keyBufferSend = null;
-          if (keyBuffer.length > 0) keyUpdate();
-        });
-      }, onError: (e) {}).whenComplete(() {
-        keyBuffer = "";
+    keyBufferSend ??= ConnectionPool.inst.get().then((con) {
+      keypadsWrite(con, getModePlayer(), keyBuffer).whenComplete(() {
+        con.free();
+        keyBufferSend = null;
+        if (keyBuffer.isNotEmpty) keyUpdate();
       });
-    }
+    }, onError: (e) {}).whenComplete(() {
+      keyBuffer = "";
+    });
   }
 
   @override
@@ -332,7 +347,7 @@ class _KeypadViewState extends State<KeypadView> {
             ],
           ),
         ),
-        SizedBox(height: kBottomNavigationBarHeight),
+        const SizedBox(height: kBottomNavigationBarHeight),
       ],
     );
   }

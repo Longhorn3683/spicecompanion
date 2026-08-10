@@ -5,7 +5,6 @@ import 'dart:math';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:core';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:hex/hex.dart';
@@ -19,11 +18,11 @@ part 'tagman.dart';
 part 'cipher.dart';
 
 Future<String> downloadTextFromURL(String url) async {
-  return new HttpClient()
+  return HttpClient()
       .getUrl(Uri.parse(url))
       .then((HttpClientRequest req) => req.close())
       .then((HttpClientResponse res) {
-    return res.transform(Utf8Decoder()).toList().then((data) {
+    return res.transform(const Utf8Decoder()).toList().then((data) {
       return data.join("");
     });
   });

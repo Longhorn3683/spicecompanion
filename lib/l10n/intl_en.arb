@@ -10,11 +10,10 @@
     "view_lights": "Lights",
     "view_info": "Server Information",
     "view_settings": "Settings",
-
+    "tap_to_connect": "Tap to connect to server",
     "connect_a_server": "Please connect to a server",
     "connect_failed_to": "Failed to connect to",
     "connect_failed_password": "Failed to connect: Wrong password?",
-
     "no_controller_view": "This game does not yet have a controller view :(",
     "no_analogs": "No analogs available :(",
     "no_buttons": "No buttons available :(",
@@ -23,21 +22,19 @@
     "insert_p2": "Insert to P2",
     "edit": "Edit",
     "remove": "Remove",
-    "card_inserting": "Inserting Card",
+    "card_inserting": "Inserting",
     "card_insert_keypad": "Insert Card",
-    "card_tap": "Tip: Tap your card to the back of your phone.",
+    "card_tap": "Tip: If device supports NFC, you can enable NFC and tap cards with your device.",
     "card_add": "Add Card",
     "card_edit": "Edit Card",
     "name": "Name",
     "card_main": "Main Card",
     "card_id": "Card ID",
     "optional": "optional",
-
     "cancel": "Cancel",
     "ok": "OK",
     "add": "Add",
     "save": "Save",
-
     "insert_coin_1": "Insert 1 Coin",
     "insert_coin_5": "Insert 5 Coins",
     "insert_coin_10": "Insert 10 Coins",
@@ -49,9 +46,7 @@
     "restart_prompt": "Restart PC?",
     "shutdown": "Shutdown",
     "shutdown_prompt": "Shutdown PC?",
-
-    "swipe_card": "Swipe card",
-    "or_select_in_cards": "or tap to select in cards",
+    "insert_card": "Insert your card",
     "add_cards_first": "Please add cards first.",
     "card_select": "Select Card",
     "launch_args": "Launch Args",
@@ -69,7 +64,6 @@
     "vaild_int": "Must be a valid integer!",
     "password": "Password",
     "cannot_be_empty": "Can't be empty!",
-
     "fullscreen": "Fullscreen",
     "tap_to_show_bar": "Tap screen top to show top bar",
     "dark_mode": "Dark Mode",
@@ -80,11 +74,9 @@
     "open_screenshots": "Open Screenshots Folder",
     "licenses": "Licenses",
     "about": "About",
-   
     "no_patch_known": "No patches known for this version :(",
     "enabled": "Enabled",
     "disabled": "Disabled",
-
     "patch_preset": "Preset",
     "patch_online": "Online",
     "patch_custom": "Custom",
@@ -112,10 +104,8 @@
     "must_be_3_letters": "Must be 3 letters!",
     "invaild_dll_name": "Invalid DLL name!",
     "must_be_vaild_hex": "Must be a valid hex string!",
-
     "disconnected": "Disconnected",
     "system_time": "System Time",
-
     "args_cfg": "Open configuration window",
     "args_ea": "Enable integrated EA server",
     "args_eamaint": "Enable integrated EA server",
@@ -186,5 +176,12 @@
     "args_apipretty": "Pretty JSON printing",
     "args_apilogging": "Enable API logs (dec. perf.)",
     "args_apidebug": "Run API only on debug settings",
-    "args_dbghookdisable": "Disable debug message logging"
+    "args_dbghookdisable": "Disable debug message logging",
+    "photo_saved": "Saved to photos",
+    "screen_always_on": "Screen Always On",
+    "pure_black": "Pure Black",
+    "screenshot": "Screenshot",
+    "insert_coin": "Insert Coin",
+    "game_menu": "Game Menu",
+    "switch_view": "Switch View"
 }

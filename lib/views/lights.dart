@@ -1,6 +1,9 @@
 part of views;
 
 class LightsView extends StatefulWidget {
+  const LightsView({Key key}) : super(key: key);
+
+  @override
   _LightsViewState createState() => _LightsViewState();
 }
 
@@ -39,7 +42,7 @@ class _LightsViewState extends State<LightsView> {
 
   Future<void> writeList() async {
     return ConnectionPool.inst.get().then((con) {
-      if (_lightStates == null || _lightStates.length == 0) return null;
+      if (_lightStates == null || _lightStates.isEmpty) return null;
       return lightsWrite(con, _lightStates).whenComplete(() => con.free());
     }, onError: (e) {});
   }
@@ -72,11 +75,12 @@ class _LightsViewState extends State<LightsView> {
           List<LightState> newList = [];
           for (var newState in stateList) {
             if (newState.active) locked = true;
-            if (!ignoreLightNames.contains(newState.name))
+            if (!ignoreLightNames.contains(newState.name)) {
               newList.add(newState);
-            else
+            } else {
               newList.addAll(_lightStates
                   .where((oldState) => oldState.name == newState.name));
+            }
           }
           _lightStates = newList;
           _lightStatesLock = false;
@@ -95,9 +99,9 @@ class _LightsViewState extends State<LightsView> {
   @override
   Widget build(BuildContext context) {
     // empty view
-    if (_lightStates.length == 0)
+    if (_lightStates.isEmpty) {
       return CustomScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
             systemOverlayStyle: getSystemUiOverlayStyle(context),
@@ -110,6 +114,7 @@ class _LightsViewState extends State<LightsView> {
           ),
         ],
       );
+    }
 
     // list view
     return CustomScrollView(
@@ -165,17 +170,18 @@ class _LightsViewState extends State<LightsView> {
                 },
               ),
               onTap: () async {
-                if (light.state >= 0.5)
+                if (light.state >= 0.5) {
                   light.state = 0;
-                else
+                } else {
                   light.state = 1;
+                }
                 await writeSingle(light);
                 setState(() {});
               },
             );
           }).toList(),
         )),
-        SliverPadding(
+        const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );

@@ -55,12 +55,15 @@ class CardInfo {
 }
 
 class CardManagerView extends StatefulWidget {
+  const CardManagerView({Key key}) : super(key: key);
+
+  @override
   _CardManagerViewState createState() => _CardManagerViewState();
 }
 
 class _CardManagerViewState extends State<CardManagerView> {
   DateTime insertLast = DateTime.now();
-  Duration insertGap = Duration(seconds: 2);
+  Duration insertGap = const Duration(seconds: 2);
 
   @override
   void initState() {
@@ -79,14 +82,15 @@ class _CardManagerViewState extends State<CardManagerView> {
         SliverAppBar.large(
           systemOverlayStyle: getSystemUiOverlayStyle(context),
           leading: IconButton(
-            icon: Icon(Icons.menu),
+            tooltip: S.current.card_add,
+            icon: const Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
           title: Text(getViewName(SpiceView.CardManager)),
           actions: <Widget>[
             // 'Add Card' Button
             IconButton(
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -104,7 +108,7 @@ class _CardManagerViewState extends State<CardManagerView> {
           ],
         ),
         SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           sliver: SliverList(
             delegate: SliverChildListDelegate(cardList.map((CardInfo card) {
               return Card(
@@ -116,17 +120,20 @@ class _CardManagerViewState extends State<CardManagerView> {
                 color: card.active ? Colors.lightGreen : null,
                 clipBehavior: Clip.antiAlias,
                 child: ListTile(
-                  contentPadding: EdgeInsets.only(left: 16, right: 8),
+                  contentPadding: const EdgeInsets.only(left: 16, right: 8),
                   title: Text(card.name +
                       (card.active ? " (${S.current.active})" : "")),
                   subtitle: Text(card.id),
                   onTap: () {
                     setState(() {
                       if (!card.active) {
-                        for (var i in cardList) i.active = false;
+                        for (var i in cardList) {
+                          i.active = false;
+                        }
                         card.active = true;
-                      } else
+                      } else {
                         card.active = false;
+                      }
                     });
                     cardListSave();
                   },
@@ -137,7 +144,7 @@ class _CardManagerViewState extends State<CardManagerView> {
                       Widget child,
                     ) {
                       return IconButton(
-                        icon: Icon(Icons.more_vert),
+                        icon: const Icon(Icons.more_vert),
                         onPressed: () {
                           // ask which player if multiple readers are present
                           if (getPlayerCount(gameModel) <= 1) {
@@ -159,18 +166,18 @@ class _CardManagerViewState extends State<CardManagerView> {
                     },
                     menuChildren: [
                       MenuItemButton(
-                        leadingIcon: Icon(Icons.send),
+                        leadingIcon: const Icon(Icons.send),
                         child: Text(S.current.insert_p1),
                         onPressed: () => _insertCard(0, card.id),
                       ),
                       MenuItemButton(
-                        leadingIcon: Icon(Icons.send),
+                        leadingIcon: const Icon(Icons.send),
                         child: Text(S.current.insert_p2),
                         onPressed: () => _insertCard(1, card.id),
                       ),
-                      Divider(),
+                      const Divider(),
                       MenuItemButton(
-                          leadingIcon: Icon(Icons.edit),
+                          leadingIcon: const Icon(Icons.edit),
                           child: Text(S.current.edit),
                           onPressed: () {
                             showDialog(
@@ -191,7 +198,7 @@ class _CardManagerViewState extends State<CardManagerView> {
                             );
                           }),
                       MenuItemButton(
-                        leadingIcon: Icon(Icons.delete),
+                        leadingIcon: const Icon(Icons.delete),
                         child: Text(S.current.remove),
                         onPressed: () {
                           setState(() => cardList.remove(card));
@@ -205,7 +212,7 @@ class _CardManagerViewState extends State<CardManagerView> {
             }).toList()),
           ),
         ),
-        SliverPadding(
+        const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
@@ -215,9 +222,14 @@ class _CardManagerViewState extends State<CardManagerView> {
     ConnectionPool.inst.get().then((con) {
       // show info
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text("${S.current.card_inserting}: $cardID"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.red,
         duration: insertGap,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
 
       // insert card
@@ -227,9 +239,14 @@ class _CardManagerViewState extends State<CardManagerView> {
     }, onError: (err) {
       // show error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        width: 300,
         content: Text(S.current.connect_a_server),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.red,
         duration: insertGap,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
       ));
     });
   }
@@ -241,7 +258,8 @@ class CardEditView extends StatefulWidget {
   // If none provided, the UI will say 'Add' not 'Edit'/'Save'
   final CardInfo baseDetails;
 
-  CardEditView({@required this.onSave, this.baseDetails});
+  const CardEditView({Key key, @required this.onSave, this.baseDetails})
+      : super(key: key);
 
   @override
   _CardEditViewState createState() => _CardEditViewState();
@@ -291,24 +309,24 @@ class _CardEditViewState extends State<CardEditView> {
 
     // subscribe to tag input
     cardIDController.text = _data.id;
-    this.cardSubscription = TagManager.inst.tagStream.stream.listen((id) {
+    cardSubscription = TagManager.inst.tagStream.stream.listen((id) {
       cardIDController.text = id;
     });
   }
 
   @override
   void dispose() {
-    if (this.cardSubscription != null) this.cardSubscription.cancel();
+    if (cardSubscription != null) cardSubscription.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Widget getNFCTip() {
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (Platform.isAndroid) {
         return Text(S.current.card_tap);
       } else {
-        return SizedBox();
+        return const SizedBox();
       }
     }
 
@@ -408,30 +426,31 @@ class _CardEditViewState extends State<CardEditView> {
   }
 
   String validateBasic(String s) {
-    if (s.length == 0) return "Can't be empty!";
+    if (s.isEmpty) return "Can't be empty!";
     return null;
   }
 
   String validateCard(String cardID) {
     if (cardID.length != 16) return "Must be 16 characters!";
-    if (!RegExp(r"^[a-fA-F0-9]+$").hasMatch(cardID))
+    if (!RegExp(r"^[a-fA-F0-9]+$").hasMatch(cardID)) {
       return "Contains invalid characters!";
+    }
     return null;
   }
 
   String validatePublicID(String pubID) {
-    if (pubID.length == 0) return null;
+    if (pubID.isEmpty) return null;
     if (pubID.length != 16) return "Must be empty or of length 16!";
     String allowedChars = "0123456789ABCDEFGHJKLMNPRSTUWXYZ";
     for (int i = 0; i < pubID.length; i++) {
-      if (!allowedChars.contains(pubID[i]))
+      if (!allowedChars.contains(pubID[i])) {
         return "Contains invalid characters!";
+      }
     }
     try {
       String decoded = CardCipher.decode(pubID);
       if (decoded != null && decoded.length == 16) return null;
-    } on Exception {
-    } on Error {}
+    } on Exception {}
     return "Unable to parse ID!";
   }
 }

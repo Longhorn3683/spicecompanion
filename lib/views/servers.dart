@@ -34,6 +34,9 @@ class ServerInfo {
 }
 
 class ServerView extends StatefulWidget {
+  const ServerView({Key key}) : super(key: key);
+
+  @override
   _ServerViewState createState() => _ServerViewState();
 }
 
@@ -45,7 +48,7 @@ class _ServerViewState extends State<ServerView> {
     super.initState();
     if (serverViewTimer != null) serverViewTimer.cancel();
     serverViewTimer =
-        Timer.periodic(Duration(milliseconds: 500), serverViewTick);
+        Timer.periodic(const Duration(milliseconds: 500), serverViewTick);
 
     // reload server list
     preferencesGetStringList(cStoredServers).then((storedList) {
@@ -55,7 +58,7 @@ class _ServerViewState extends State<ServerView> {
           try {
             var server = ServerInfo.fromJson(json);
             newList.add(server);
-          } catch (Exception) {
+          } on Exception {
             debugPrint("Couldn't parse ServerInfo: $json");
           }
         }
@@ -76,7 +79,7 @@ class _ServerViewState extends State<ServerView> {
     // auto refresh state for connected/disconnected state
     try {
       setState(() {});
-    } catch (Exception) {}
+    } on Exception {}
   }
 
   Future<void> saveServerList() {
@@ -97,7 +100,7 @@ class _ServerViewState extends State<ServerView> {
           actions: <Widget>[
             // 'Add Server' Button
             IconButton(
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -115,15 +118,16 @@ class _ServerViewState extends State<ServerView> {
           ],
         ),
         SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           sliver: SliverList(
             delegate: SliverChildListDelegate(
               serverList.map((ServerInfo s) {
                 var isCon =
                     ConnectionPool.inst.isActive(s.address, s.port, s.pass);
                 var isConStr = isCon ? " (${S.current.active})" : "";
-                if (isCon && !hasConnection)
+                if (isCon && !hasConnection) {
                   isConStr = " (${S.current.disconnected})";
+                }
                 return Card(
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
@@ -141,9 +145,9 @@ class _ServerViewState extends State<ServerView> {
                     subtitle: Text('${s.address}:${s.port}'),
                     onTap: () {
                       // check for connect/disconnect
-                      if (!isCon)
+                      if (!isCon) {
                         _tryConnect(s);
-                      else {
+                      } else {
                         // show disconnect info
                         /*ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text("Disconnected."),
@@ -162,7 +166,7 @@ class _ServerViewState extends State<ServerView> {
                         Widget child,
                       ) {
                         return IconButton(
-                          icon: Icon(Icons.more_vert),
+                          icon: const Icon(Icons.more_vert),
                           onPressed: () {
                             if (controller.isOpen) {
                               controller.close();
@@ -174,7 +178,7 @@ class _ServerViewState extends State<ServerView> {
                       },
                       menuChildren: [
                         MenuItemButton(
-                            leadingIcon: Icon(Icons.edit),
+                            leadingIcon: const Icon(Icons.edit),
                             child: Text(S.current.edit),
                             onPressed: () {
                               showDialog(
@@ -196,7 +200,7 @@ class _ServerViewState extends State<ServerView> {
                               );
                             }),
                         MenuItemButton(
-                          leadingIcon: Icon(Icons.delete),
+                          leadingIcon: const Icon(Icons.delete),
                           child: Text(S.current.remove),
                           onPressed: () {
                             setState(() => serverList.remove(s));
@@ -211,7 +215,7 @@ class _ServerViewState extends State<ServerView> {
             ),
           ),
         ),
-        SliverPadding(
+        const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
@@ -248,11 +252,12 @@ class _ServerViewState extends State<ServerView> {
 
       // show error
       var text = "";
-      if (err is APIError)
+      if (err is APIError) {
         text = S.current.connect_failed_password;
-      else
+      } else {
         text =
             "${S.current.connect_failed_to} ${server.address}:${server.port}";
+      }
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -286,12 +291,14 @@ class _ServerViewState extends State<ServerView> {
 }
 
 class ServerEditView extends StatefulWidget {
-  ServerEditView({@required this.onSave, this.baseDetails});
+  const ServerEditView({Key key, @required this.onSave, this.baseDetails})
+      : super(key: key);
 
   final void Function(ServerInfo) onSave;
   // If none provided, the UI will say 'Add' not 'Edit'/'Save'
   final ServerInfo baseDetails;
 
+  @override
   _ServerEditViewState createState() => _ServerEditViewState();
 }
 
@@ -421,7 +428,7 @@ class _ServerEditViewState extends State<ServerEditView> {
   }
 
   String validateBasic(String s) {
-    if (s.length == 0) return S.current.cannot_be_empty;
+    if (s.isEmpty) return S.current.cannot_be_empty;
     return null;
   }
 }

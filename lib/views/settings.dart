@@ -8,6 +8,16 @@ class Settings {
     return _darkMode;
   }
 
+  static bool _blackMode;
+  static get blackMode {
+    return _blackMode;
+  }
+
+  static bool _alwaysOn;
+  static get alwaysOn {
+    return _alwaysOn;
+  }
+
   static set darkMode(bool value) {
     if (_darkMode == value) return;
     switch (value) {
@@ -15,10 +25,42 @@ class Settings {
         currentTheme = SpiceTheme.Light;
         break;
       case true:
-        currentTheme = SpiceTheme.Dark;
+        currentTheme = _blackMode ? SpiceTheme.Black : SpiceTheme.Dark;
         break;
     }
     _darkMode = value;
+    save();
+  }
+
+  static set blackMode(bool value) {
+    if (_blackMode == value) return;
+    switch (value) {
+      case false:
+        if (_darkMode == true) {
+          currentTheme = SpiceTheme.Dark;
+        }
+        break;
+      case true:
+        if (_darkMode == true) {
+          currentTheme = SpiceTheme.Black;
+        }
+        break;
+    }
+    _blackMode = value;
+    save();
+  }
+
+  static set alwaysOn(bool value) {
+    if (_alwaysOn == value) return;
+    switch (value) {
+      case false:
+        WakelockPlus.disable();
+        break;
+      case true:
+        WakelockPlus.enable();
+        break;
+    }
+    _alwaysOn = value;
     save();
   }
 
@@ -31,6 +73,8 @@ class Settings {
     // build json
     var map = {};
     map["darkMode"] = darkMode;
+    map["blackMode"] = blackMode;
+    map["alwaysOn"] = alwaysOn;
     map["buttonVibrationDuration"] = buttonVibrationDuration;
     map["screenQuality"] = screenQuality;
     map["screenThreads"] = screenThreads;
@@ -48,10 +92,12 @@ class Settings {
     // load from preferences
     try {
       var json = await preferencesGetString(preferencesKey);
-      if (json != null && json.length > 0) {
+      if (json != null && json.isNotEmpty) {
         // decode json
         var map = jsonDecode(json);
         darkMode = map["darkMode"] ?? darkMode;
+        blackMode = map["blackMode"] ?? blackMode;
+        alwaysOn = map["alwaysOn"] ?? alwaysOn;
         buttonVibrationDuration =
             map["buttonVibrationDuration"] ?? buttonVibrationDuration;
         screenQuality = map["screenQuality"] ?? screenQuality;
@@ -66,10 +112,14 @@ class Settings {
   static void defaults() {
     currentTheme = SpiceTheme.Dark;
     _darkMode = true;
+    _blackMode = false;
+    _alwaysOn = false;
   }
 }
 
 class SettingsView extends StatefulWidget {
+  const SettingsView({Key key}) : super(key: key);
+
   @override
   _SettingsViewState createState() => _SettingsViewState();
 }
@@ -80,9 +130,8 @@ class _SettingsViewState extends State<SettingsView> {
     Widget getVibrationTile() {
       if (Platform.isAndroid || Platform.isIOS) {
         return ListTile(
-          title: Text("${S.current.button_vibration}: " +
-              Settings.buttonVibrationDuration.toInt().toString() +
-              "ms"),
+          title: Text(
+              "${S.current.button_vibration}: ${Settings.buttonVibrationDuration.toInt()}ms"),
           subtitle: Slider(
             value: Settings.buttonVibrationDuration,
             min: 0,
@@ -102,7 +151,7 @@ class _SettingsViewState extends State<SettingsView> {
           ),
         );
       } else {
-        return SizedBox();
+        return const SizedBox();
       }
     }
 
@@ -119,7 +168,7 @@ class _SettingsViewState extends State<SettingsView> {
               launchUrl(Uri.parse('file:///${screenshots.path}'));
             });
       } else {
-        return SizedBox();
+        return const SizedBox();
       }
     }
 
@@ -135,7 +184,7 @@ class _SettingsViewState extends State<SettingsView> {
               StatefulBuilder(
                 builder: (context, fullscreenState) {
                   return SwitchListTile(
-                    secondary: Icon(Icons.aspect_ratio),
+                    secondary: const Icon(Icons.aspect_ratio),
                     title: Text(S.current.fullscreen),
                     value: isFullScreen,
                     onChanged: (value) {
@@ -146,7 +195,16 @@ class _SettingsViewState extends State<SettingsView> {
                 },
               ),
               SwitchListTile(
-                secondary: Icon(Icons.dark_mode),
+                secondary: const Icon(Icons.brightness_high),
+                title: Text(S.current.screen_always_on),
+                value: Settings.alwaysOn,
+                onChanged: (value) {
+                  Settings.alwaysOn = value;
+                  setState(() {});
+                },
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.dark_mode),
                 title: Text(S.current.dark_mode),
                 value: Settings.darkMode,
                 onChanged: (value) {
@@ -154,12 +212,19 @@ class _SettingsViewState extends State<SettingsView> {
                   setState(() {});
                 },
               ),
-              Divider(),
+              SwitchListTile(
+                title: Text(S.current.pure_black),
+                value: Settings.blackMode,
+                onChanged: (value) {
+                  Settings.blackMode = value;
+                  setState(() {});
+                },
+              ),
+              const Divider(),
               getVibrationTile(),
               ListTile(
-                title: Text("${S.current.screen_quality}: " +
-                    Settings.screenQuality.toInt().toString() +
-                    "%"),
+                title: Text(
+                    "${S.current.screen_quality}: ${Settings.screenQuality.toInt()}%"),
                 subtitle: Slider(
                   value: Settings.screenQuality,
                   min: 0,
@@ -174,8 +239,8 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               ),
               ListTile(
-                title: Text("${S.current.screen_threads}: " +
-                    Settings.screenThreads.toInt().toString()),
+                title: Text(
+                    "${S.current.screen_threads}: ${Settings.screenThreads.toInt()}"),
                 subtitle: Slider(
                   value: Settings.screenThreads,
                   min: 1,
@@ -189,8 +254,8 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               ),
               ListTile(
-                title: Text("${S.current.screen_divide}: " +
-                    Settings.screenDivide.toInt().toString()),
+                title: Text(
+                    "${S.current.screen_divide}: ${Settings.screenDivide.toInt()}"),
                 subtitle: Slider(
                   value: Settings.screenDivide,
                   min: 1,
@@ -203,7 +268,7 @@ class _SettingsViewState extends State<SettingsView> {
                   },
                 ),
               ),
-              Divider(),
+              const Divider(),
               getOpenScreenshotsTile(),
               ListTile(
                 title: Text(S.current.licenses),
@@ -213,7 +278,7 @@ class _SettingsViewState extends State<SettingsView> {
                   Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LicensePage()))
+                              builder: (context) => const LicensePage()))
                       .then((val) => Intl.defaultLocale = locale);
                 },
               ),
@@ -221,14 +286,14 @@ class _SettingsViewState extends State<SettingsView> {
                 title: Text(S.current.about),
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => AboutView()),
+                    MaterialPageRoute(builder: (context) => const AboutView()),
                   );
                 },
               ),
             ],
           ),
         ),
-        SliverPadding(
+        const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );
@@ -236,6 +301,8 @@ class _SettingsViewState extends State<SettingsView> {
 }
 
 class AboutView extends StatefulWidget {
+  const AboutView({Key key}) : super(key: key);
+
   @override
   _AboutViewState createState() => _AboutViewState();
 }
@@ -265,11 +332,11 @@ class _AboutViewState extends State<AboutView> {
           systemOverlayStyle: getSystemUiOverlayStyle(context),
           title: Text(S.current.about)),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Text(
             content,
-            style: TextStyle(fontSize: 23),
+            style: const TextStyle(fontSize: 23),
           ),
         ),
       ),

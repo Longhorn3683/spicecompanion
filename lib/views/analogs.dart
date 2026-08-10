@@ -1,6 +1,8 @@
 part of views;
 
 class AnalogsView extends StatefulWidget {
+  const AnalogsView({Key key}) : super(key: key);
+
   @override
   _AnalogsViewState createState() => _AnalogsViewState();
 }
@@ -40,7 +42,7 @@ class _AnalogsViewState extends State<AnalogsView> {
 
   Future<void> writeList() async {
     return ConnectionPool.inst.get().then((con) {
-      if (_analogStates == null || _analogStates.length == 0) return null;
+      if (_analogStates == null || _analogStates.isEmpty) return null;
       return analogsWrite(con, _analogStates).whenComplete(() => con.free());
     }, onError: (e) {});
   }
@@ -73,11 +75,12 @@ class _AnalogsViewState extends State<AnalogsView> {
           List<AnalogState> newList = [];
           for (var newState in stateList) {
             if (newState.active) locked = true;
-            if (!ignoreAnalogNames.contains(newState.name))
+            if (!ignoreAnalogNames.contains(newState.name)) {
               newList.add(newState);
-            else
+            } else {
               newList.addAll(_analogStates
                   .where((oldState) => oldState.name == newState.name));
+            }
           }
           _analogStates = newList;
           _analogStatesLock = false;
@@ -96,9 +99,9 @@ class _AnalogsViewState extends State<AnalogsView> {
   @override
   Widget build(BuildContext context) {
     // empty view
-    if (_analogStates.length == 0)
+    if (_analogStates.isEmpty) {
       return CustomScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
             systemOverlayStyle: getSystemUiOverlayStyle(context),
@@ -111,6 +114,7 @@ class _AnalogsViewState extends State<AnalogsView> {
           ),
         ],
       );
+    }
 
     // list view
     return CustomScrollView(
@@ -166,17 +170,18 @@ class _AnalogsViewState extends State<AnalogsView> {
                 },
               ),
               onTap: () async {
-                if (analog.state >= 0.5)
+                if (analog.state >= 0.5) {
                   analog.state = 0;
-                else
+                } else {
                   analog.state = 1;
+                }
                 await writeSingle(analog);
                 setState(() {});
               },
             );
           }).toList(),
         )),
-        SliverPadding(
+        const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
     );

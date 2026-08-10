@@ -8,11 +8,11 @@ String gameRev = "";
 String gameExt = "";
 String _gameName = "";
 String _gameServer = "";
-Duration lastPing = Duration(seconds: 1);
+Duration lastPing = const Duration(seconds: 1);
 
 bool toolbarHidden = false;
 
-enum SpiceTheme { Light, Dark }
+enum SpiceTheme { Light, Dark, Black }
 
 final spiceThemes = {
   SpiceTheme.Light: ThemeData(
@@ -22,11 +22,22 @@ final spiceThemes = {
   SpiceTheme.Dark: ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-  )
+  ),
+  SpiceTheme.Black: ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: Colors.black,
+    appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.black, surfaceTintColor: Colors.black),
+    cardTheme: const CardTheme(color: Colors.black, elevation: 0),
+  ),
 };
 SpiceTheme currentTheme;
 
 class MainView extends StatefulWidget {
+  const MainView({Key key}) : super(key: key);
+
+  @override
   _MainViewState createState() => _MainViewState();
 }
 
@@ -53,7 +64,7 @@ class _MainViewState extends State<MainView> {
 
     // create new timer
     _gameTimer = Timer.periodic(
-        Duration(
+        const Duration(
           seconds: 1,
         ),
         _gameTimerTick);
@@ -106,7 +117,7 @@ class _MainViewState extends State<MainView> {
       // set title
       setState(() {
         _gameName = S.current.disconnected;
-        _gameServer = S.current.connect_a_server;
+        _gameServer = S.current.tap_to_connect;
       });
     });
   }
@@ -117,7 +128,7 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     return MaterialApp(
         onGenerateTitle: (context) => 'Spice L3',
-        localizationsDelegates: [
+        localizationsDelegates: const [
           S.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
@@ -128,7 +139,7 @@ class _MainViewState extends State<MainView> {
         home:
             StatefulBuilder(builder: (BuildContext context, StateSetter state) {
           return Scaffold(
-            body: _viewWidget,
+            body: SafeArea(top: false, bottom: false, child: _viewWidget),
             drawer: NavigationDrawer(
               selectedIndex: selectedIndex,
               onDestinationSelected: (int index) {
@@ -145,59 +156,59 @@ class _MainViewState extends State<MainView> {
                   onTap: () => showModalBottomSheet(
                       context: context,
                       clipBehavior: Clip.antiAlias,
-                      builder: (context) => ServerView()),
+                      builder: (context) => const ServerView()),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.info),
+                  icon: const Icon(Icons.info),
                   label: Text(getViewName(SpiceView.Info)),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.credit_card),
+                  icon: const Icon(Icons.credit_card),
                   label: Text(getViewName(SpiceView.CardManager)),
                 ),
-                Divider(),
+                const Divider(),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.dialpad),
+                  icon: const Icon(Icons.dialpad),
                   label: Text(getViewName(SpiceView.Keypad)),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.memory),
+                  icon: const Icon(Icons.memory),
                   label: Text(getViewName(SpiceView.Patches)),
                 ),
-                Divider(),
+                const Divider(),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.cast),
+                  icon: const Icon(Icons.cast),
                   label: Text(getViewName(SpiceView.Screen)),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.gamepad),
+                  icon: const Icon(Icons.gamepad),
                   label: Text(getViewName(SpiceView.Controller)),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.keyboard),
+                  icon: const Icon(Icons.keyboard),
                   label: Text(getViewName(SpiceView.Buttons)),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.threesixty),
+                  icon: const Icon(Icons.threesixty),
                   label: Text(getViewName(SpiceView.Analogs)),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.lightbulb_outline),
+                  icon: const Icon(Icons.lightbulb_outline),
                   label: Text(getViewName(SpiceView.Lights)),
                 ),
-                Divider(),
+                const Divider(),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.settings),
+                  icon: const Icon(Icons.settings),
                   label: Text(getViewName(SpiceView.Settings)),
                 ),
-                SizedBox(height: 2 + kBottomNavigationBarHeight),
+                const SizedBox(height: 2 + kBottomNavigationBarHeight),
               ],
             ),
           );

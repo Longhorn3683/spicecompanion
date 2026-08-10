@@ -1,25 +1,21 @@
 part of util;
 
 class TagManager {
-  static TagManager inst = new TagManager();
+  static TagManager inst = TagManager();
 
   StreamController<String> tagStream;
 
   TagManager() {
-    this.tagStream = StreamController<String>.broadcast();
+    tagStream = StreamController<String>.broadcast();
   }
 
   void dispose() {
-    this.tagStream.close();
+    tagStream.close();
   }
 
   Future<void> start() async {
     // don't subscribe if on unsupported platform
-    if (!Platform.isAndroid &&
-            !Platform.isIOS &&
-            defaultTargetPlatform != TargetPlatform.ohos
-        //&& !Platform.isOhos
-        ) {
+    if (!Platform.isAndroid) {
       print("NFC features unsupported.");
       return;
     }
@@ -50,10 +46,12 @@ class TagManager {
         if (id.length > 16) id = id.substring(0, 16);
 
         // fill with zeroes
-        while (id.length < 16) id += "0";
+        while (id.length < 16) {
+          id += "0";
+        }
 
         // check length
-        if (id.length == 16) this.tagStream.add(id);
+        if (id.length == 16) tagStream.add(id);
       }
     }, onError: (e) {
       print("NFC features unavailable.");

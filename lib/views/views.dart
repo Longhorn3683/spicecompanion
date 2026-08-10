@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
@@ -18,8 +17,10 @@ import 'package:spicecompanion/spiceapi/spiceapi.dart';
 import 'package:spicecompanion/util/util.dart';
 import 'package:spicecompanion/platform/platform.dart';
 import 'package:mutex/mutex.dart';
+import 'package:spicecompanion/views/photo_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibration/vibration.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 part 'servers.dart';
 part 'cardmanager.dart';
@@ -68,25 +69,25 @@ SpiceView defaultSpiceView = SpiceView.Info;
 Widget getView(SpiceView view) {
   switch (view) {
     case SpiceView.CardManager:
-      return CardManagerView();
+      return const CardManagerView();
     case SpiceView.Keypad:
-      return KeypadView();
+      return const KeypadView();
     case SpiceView.Patches:
-      return PatchesView();
+      return const PatchesView();
     case SpiceView.Screen:
-      return ScreenView();
+      return const ScreenView();
     case SpiceView.Controller:
       return ControllerView();
     case SpiceView.Buttons:
-      return ButtonsView();
+      return const ButtonsView();
     case SpiceView.Analogs:
-      return AnalogsView();
+      return const AnalogsView();
     case SpiceView.Lights:
-      return LightsView();
+      return const LightsView();
     case SpiceView.Info:
-      return InfoView();
+      return const InfoView();
     case SpiceView.Settings:
-      return SettingsView();
+      return const SettingsView();
     default:
       return Material(
           color: Colors.red,
@@ -103,27 +104,27 @@ Widget getView(SpiceView view) {
 Icon getViewIcon(SpiceView view) {
   switch (view) {
     case SpiceView.CardManager:
-      return Icon(Icons.credit_card);
+      return const Icon(Icons.credit_card);
     case SpiceView.Keypad:
-      return Icon(Icons.dialpad);
+      return const Icon(Icons.dialpad);
     case SpiceView.Patches:
-      return Icon(Icons.memory);
+      return const Icon(Icons.memory);
     case SpiceView.Screen:
-      return Icon(Icons.cast);
+      return const Icon(Icons.cast);
     case SpiceView.Controller:
-      return Icon(Icons.gamepad);
+      return const Icon(Icons.gamepad);
     case SpiceView.Buttons:
-      return Icon(Icons.keyboard);
+      return const Icon(Icons.keyboard);
     case SpiceView.Analogs:
-      return Icon(Icons.threesixty);
+      return const Icon(Icons.threesixty);
     case SpiceView.Lights:
-      return Icon(Icons.lightbulb_outline);
+      return const Icon(Icons.lightbulb_outline);
     case SpiceView.Info:
-      return Icon(Icons.info);
+      return const Icon(Icons.info);
     case SpiceView.Settings:
-      return Icon(Icons.settings);
+      return const Icon(Icons.settings);
     default:
-      return Icon(Icons.error);
+      return const Icon(Icons.error);
   }
 }
 
