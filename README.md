@@ -10,9 +10,9 @@ Powered by Flutter 3.7
 ## Features
 - Support Android, iOS (include Mac with Apple Chip), HarmonyOS, Windows (other platform coming soon)
 - Game status overview
-- Quick Screenshot (Save to companion device)
+- Quick Screenshot (Save to companion device, different from PrtScr on spice2x)
 - Manage and insert cards
-- Scan cards using NFC (currently support Android and iOS)
+- Scan cards using NFC (Android only)
 - Virtual Keypad
 - Live Patches: Enable/Disable hex edits on the fly
 - Online patch list download

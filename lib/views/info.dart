@@ -155,20 +155,43 @@ class _InfoViewState extends State<InfoView> {
               var dir = await getApplicationDocumentsDirectory();
               String name =
                   'SpiceCapture_${DateTime.now().toString().replaceAll('-', '').replaceAll(':', '').replaceAll(' ', '').replaceAll('.', '')}';
-              var file = File("${dir.path}/$name.jpg");
+              var screenshots = Directory('${dir.path}/Spice L3');
+              if (!screenshots.existsSync()) {
+                await screenshots.create();
+              }
+              var file = File("${screenshots.path}/$name.jpg");
 
               ConnectionPool.inst.get().then((con) {
                 captureGetJPG(con, screen: 0, divide: 1, quality: 100)
                     .then((capture) async {
                   await file.writeAsBytes(capture.data.toList(growable: false),
                       flush: true);
-                  await GallerySaver.saveImage(file.path);
-                  await Share.shareFiles(<String>[file.path],
-                      mimeTypes: <String>["image/jpeg"]);
+                  if (Platform.isAndroid ||
+                      Platform.isIOS ||
+                      defaultTargetPlatform == TargetPlatform.ohos) {
+                    await GallerySaver.saveImage(file.path);
+                    await Share.shareFiles(<String>[file.path],
+                        mimeTypes: <String>["image/jpeg"]);
+                  } else if (Platform.isWindows ||
+                      Platform.isMacOS ||
+                      Platform.isLinux) {
+                    launchUrl(Uri.parse('file:///${file.path}'));
+                  }
                 }).whenComplete(() {
-                  file.deleteSync();
+                  if (Platform.isAndroid ||
+                      Platform.isIOS ||
+                      defaultTargetPlatform == TargetPlatform.ohos) {
+                    file.deleteSync();
+                  }
                   con.free();
                 });
+              }, onError: (err) {
+                // show error
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(S.current.connect_a_server),
+                  backgroundColor: Colors.deepOrange,
+                  duration: Duration(seconds: 1),
+                ));
               });
             },
           ),

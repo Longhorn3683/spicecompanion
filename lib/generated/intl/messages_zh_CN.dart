@@ -143,6 +143,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "no_patch_known" : MessageLookupByLibrary.simpleMessage("此版本没有已知补丁 :("),
     "no_screen" : MessageLookupByLibrary.simpleMessage("屏幕镜像不可用 :("),
     "ok" : MessageLookupByLibrary.simpleMessage("确定"),
+    "open_screenshots" : MessageLookupByLibrary.simpleMessage("打开截图文件夹"),
     "optional" : MessageLookupByLibrary.simpleMessage("可选"),
     "or_select_in_cards" : MessageLookupByLibrary.simpleMessage("或点击从列表选择卡片"),
     "password" : MessageLookupByLibrary.simpleMessage("密码"),

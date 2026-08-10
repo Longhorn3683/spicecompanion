@@ -3,6 +3,7 @@ import GallerySaverPlugin from 'gallery_saver';
 import PathProviderPlugin from 'path_provider_ohos';
 import SharePlusOhosPlugin from 'share_plus';
 import SharedPreferencesPlugin from 'shared_preferences_ohos';
+import UrlLauncherPlugin from 'url_launcher_ohos';
 
 /**
  * Generated file. Do not edit.
@@ -20,6 +21,7 @@ export class GeneratedPluginRegistrant {
       flutterEngine.getPlugins()?.add(new PathProviderPlugin());
       flutterEngine.getPlugins()?.add(new SharePlusOhosPlugin());
       flutterEngine.getPlugins()?.add(new SharedPreferencesPlugin());
+      flutterEngine.getPlugins()?.add(new UrlLauncherPlugin());
     } catch (e) {
       Log.e(
         TAG,

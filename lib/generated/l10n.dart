@@ -755,6 +755,16 @@ class S {
     );
   }
 
+  /// `Open Screenshots Folder`
+  String get open_screenshots {
+    return Intl.message(
+      'Open Screenshots Folder',
+      name: 'open_screenshots',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Licenses`
   String get licenses {
     return Intl.message(

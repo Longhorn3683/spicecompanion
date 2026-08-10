@@ -18,6 +18,7 @@ import 'package:spicecompanion/spiceapi/spiceapi.dart';
 import 'package:spicecompanion/util/util.dart';
 import 'package:spicecompanion/platform/platform.dart';
 import 'package:mutex/mutex.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vibration/vibration.dart';
 
 part 'servers.dart';

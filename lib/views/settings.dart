@@ -106,6 +106,23 @@ class _SettingsViewState extends State<SettingsView> {
       }
     }
 
+    Widget getOpenScreenshotsTile() {
+      if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+        return ListTile(
+            title: Text(S.current.open_screenshots),
+            onTap: () async {
+              var dir = await getApplicationDocumentsDirectory();
+              var screenshots = Directory('${dir.path}/Spice L3');
+              if (!screenshots.existsSync()) {
+                await screenshots.create();
+              }
+              launchUrl(Uri.parse('file:///${screenshots.path}'));
+            });
+      } else {
+        return SizedBox();
+      }
+    }
+
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
@@ -187,6 +204,7 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               ),
               Divider(),
+              getOpenScreenshotsTile(),
               ListTile(
                 title: Text(S.current.licenses),
                 onTap: () {

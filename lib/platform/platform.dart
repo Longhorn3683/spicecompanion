@@ -4,14 +4,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:desktop_window/desktop_window.dart';
+import 'package:window_manager/window_manager.dart';
 
 Future<String> _preferencesPathGet() async {
   String filename = "spicecompanion.json";
-  if (Platform.isWindows)
-    return Path.join(Platform.environment["APPDATA"], filename);
+  if (Platform.isWindows) {
+    var configPath = Path.join(Platform.environment["APPDATA"], "Spice L3");
+    Directory configDir = Directory(configPath);
+    if (!(await configDir.exists())) configDir.create();
+    return Path.join(configPath, filename);
+  }
   if (Platform.isLinux || Platform.isMacOS) {
-    var configPath = Path.join(Platform.environment["HOME"], ".config");
+    var configPath = Path.join(Platform.environment["HOME"], ".spicel3");
     Directory configDir = Directory(configPath);
     if (!(await configDir.exists())) configDir.create();
     return Path.join(configPath, filename);
@@ -119,18 +123,19 @@ Future<List> preferencesGetStringList(String key) async {
 bool isFullScreen = false;
 
 void fullscreenToggle() async {
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    // window fullscreen toggle
-    isFullScreen = !isFullScreen;
-    await DesktopWindow.setFullScreen(isFullScreen);
-  } else {
-    // navigation / title bar toggle
-    if (!isFullScreen) {
+  if (!isFullScreen) {
+    isFullScreen = true;
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      windowManager.setFullScreen(isFullScreen);
+    } else {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-      isFullScreen = true;
+    }
+  } else {
+    isFullScreen = false;
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      windowManager.setFullScreen(isFullScreen);
     } else {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      isFullScreen = false;
     }
   }
 }

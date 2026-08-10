@@ -143,6 +143,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "no_patch_known" : MessageLookupByLibrary.simpleMessage("No patches known for this version :("),
     "no_screen" : MessageLookupByLibrary.simpleMessage("Screen mirror not available :("),
     "ok" : MessageLookupByLibrary.simpleMessage("OK"),
+    "open_screenshots" : MessageLookupByLibrary.simpleMessage("Open Screenshots Folder"),
     "optional" : MessageLookupByLibrary.simpleMessage("optional"),
     "or_select_in_cards" : MessageLookupByLibrary.simpleMessage("or tap to select in cards"),
     "password" : MessageLookupByLibrary.simpleMessage("Password"),

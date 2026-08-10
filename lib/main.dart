@@ -6,6 +6,7 @@ import 'package:spicecompanion/util/util.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
+import 'package:window_manager/window_manager.dart';
 
 // desktop platform workaround for flutter
 void _setTargetPlatformForDesktop() {
@@ -25,6 +26,16 @@ void main() async {
     _setTargetPlatformForDesktop();
   } catch (e) {}
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+  WindowOptions windowOptions = WindowOptions(
+    size: Size(900, 600),
+    minimumSize: const Size(400, 300),
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // load settings

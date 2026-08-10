@@ -116,6 +116,7 @@ class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        onGenerateTitle: (context) => 'Spice L3',
         localizationsDelegates: [
           S.delegate,
           GlobalMaterialLocalizations.delegate,
@@ -196,6 +197,7 @@ class _MainViewState extends State<MainView> {
                   icon: Icon(Icons.settings),
                   label: Text(getViewName(SpiceView.Settings)),
                 ),
+                SizedBox(height: 2 + kBottomNavigationBarHeight),
               ],
             ),
           );

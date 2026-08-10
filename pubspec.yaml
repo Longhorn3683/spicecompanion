@@ -29,14 +29,18 @@ dependencies:
       path: packages/share_plus/share_plus
       ref: sensors_plus-7.2.0-ohos.1.0.0-beta.1
   path: ^1.8.0
-  #vibration: ^1.7.3
   vibration: ^2.1.0
   mutex: ^1.1.0
-  desktop_window: ^0.3.0
   gallery_saver:
     git:
       url: https://gitcode.com/CPF-Flutter/fluttertpc_gallery_saver.git
       ref: 2.3.2-ohos-1.0.0
+  window_manager: ^0.3.7
+  url_launcher: 
+    git:
+      url: "https://gitcode.com/CPF-Flutter/flutter_packages.git"
+      path: "packages/url_launcher/url_launcher"
+      ref: url_launcher_v6.1.11-ohos-1.0.1
 
 dependency_overrides:
   path_provider:
