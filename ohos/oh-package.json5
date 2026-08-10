@@ -18,6 +18,7 @@
     "shared_preferences_ohos": "file:./har/shared_preferences_ohos.har",
     "@ohos/flutter_module": "file:./entry",
     "share_plus": "file:./har/share_plus.har",
-    "gallery_saver": "file:./har/gallery_saver.har"
+    "gallery_saver": "file:./har/gallery_saver.har",
+    "url_launcher_ohos": "file:./har/url_launcher_ohos.har"
   }
 }
