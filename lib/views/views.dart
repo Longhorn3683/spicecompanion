@@ -4,6 +4,9 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui';
+
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,16 +27,17 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 part 'servers.dart';
 part 'cardmanager.dart';
-part 'keypad.dart';
 part 'buttons.dart';
 part 'analogs.dart';
 part 'lights.dart';
 part 'patches.dart';
 part 'info.dart';
+part 'info_tab.dart';
+part 'keypad_tab.dart';
 part 'resources.dart';
 part 'mainview.dart';
 part 'settings.dart';
-part 'screen.dart';
+part 'screen_tab.dart';
 part 'controllers/controller.dart';
 part 'controllers/buttoncontrol.dart';
 part 'controllers/touchcontrol.dart';
@@ -54,9 +58,7 @@ part 'controllers/we.dart';
 enum SpiceView {
   Info,
   CardManager,
-  Keypad,
   Patches,
-  Screen,
   Controller,
   Buttons,
   Analogs,
@@ -70,12 +72,8 @@ Widget getView(SpiceView view) {
   switch (view) {
     case SpiceView.CardManager:
       return const CardManagerView();
-    case SpiceView.Keypad:
-      return const KeypadView();
     case SpiceView.Patches:
       return const PatchesView();
-    case SpiceView.Screen:
-      return const ScreenView();
     case SpiceView.Controller:
       return ControllerView();
     case SpiceView.Buttons:
@@ -105,12 +103,8 @@ Icon getViewIcon(SpiceView view) {
   switch (view) {
     case SpiceView.CardManager:
       return const Icon(Icons.credit_card);
-    case SpiceView.Keypad:
-      return const Icon(Icons.dialpad);
     case SpiceView.Patches:
       return const Icon(Icons.memory);
-    case SpiceView.Screen:
-      return const Icon(Icons.cast);
     case SpiceView.Controller:
       return const Icon(Icons.gamepad);
     case SpiceView.Buttons:
@@ -132,12 +126,8 @@ String getViewName(SpiceView view) {
   switch (view) {
     case SpiceView.CardManager:
       return S.current.view_cardmanager;
-    case SpiceView.Keypad:
-      return S.current.view_keypad;
     case SpiceView.Patches:
       return S.current.view_patches;
-    case SpiceView.Screen:
-      return S.current.view_screen;
     case SpiceView.Controller:
       return S.current.view_controller;
     case SpiceView.Buttons:

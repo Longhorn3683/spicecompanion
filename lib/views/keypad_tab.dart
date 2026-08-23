@@ -43,77 +43,57 @@ class _KeypadButton extends StatelessWidget {
   final Color fontColor;
   final double fontSize;
 
-  _KeypadButton(this._key, this._label, this._cb,
+  const _KeypadButton(this._key, this._label, this._cb,
       {this.fontColor, this.fontSize});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Card(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(24),
-          ),
+    return Card(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(24),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-            enableFeedback: true, // may want to make this an option?
-            child: Center(
-              child: Text(_label,
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: fontSize ?? 42.0, color: fontColor)),
-            ),
-            onTap: () {
-              if (_cb != null) _cb(_key);
-            }),
       ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+          enableFeedback: true, // may want to make this an option?
+          child: Center(
+            child: Text(_label,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: fontSize ?? 42.0, color: fontColor)),
+          ),
+          onTap: () {
+            if (_cb != null) _cb(_key);
+          }),
     );
   }
 }
 
-class KeypadView extends StatefulWidget {
-  const KeypadView({Key key}) : super(key: key);
+class KeypadTab extends StatefulWidget {
+  const KeypadTab({Key key}) : super(key: key);
 
   @override
-  _KeypadViewState createState() => _KeypadViewState();
+  _KeypadTabState createState() => _KeypadTabState();
 }
 
-class _KeypadViewState extends State<KeypadView> {
+class _KeypadTabState extends State<KeypadTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   String keyBuffer = "";
   Future<void> keyBufferSend;
   int currentMode = 0;
-  bool active = false;
-  StreamSubscription<String> cardSubscription;
 
-  _KeypadViewState();
+  _KeypadTabState();
 
   @override
   void initState() {
     super.initState();
-    active = true;
-
-    // subscribe to card inserts
-    cardSubscription = TagManager.inst.tagStream.stream.listen((id) {
-      if (active) {
-        // check card id trigger
-        for (var card in cardList) {
-          if (card.idTrigger == id) {
-            id = card.id;
-            break;
-          }
-        }
-
-        // insert card
-        insertCardID(id);
-      }
-    });
   }
 
   @override
   void dispose() {
-    cardSubscription.cancel();
-    active = false;
     super.dispose();
   }
 
@@ -285,70 +265,95 @@ class _KeypadViewState extends State<KeypadView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        AppBar(
-          systemOverlayStyle: getSystemUiOverlayStyle(context),
-          title: Text(getViewName(SpiceView.Keypad)),
+    return Scaffold(
+      appBar: AppBar(
+        systemOverlayStyle: getSystemUiOverlayStyle(context),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key7, '7', keyCallback),
-              _KeypadButton(KeypadKey.Key8, '8', keyCallback),
-              _KeypadButton(KeypadKey.Key9, '9', keyCallback),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key4, '4', keyCallback),
-              _KeypadButton(KeypadKey.Key5, '5', keyCallback),
-              _KeypadButton(KeypadKey.Key6, '6', keyCallback),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key1, '1', keyCallback),
-              _KeypadButton(KeypadKey.Key2, '2', keyCallback),
-              _KeypadButton(KeypadKey.Key3, '3', keyCallback),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(KeypadKey.Key0, '0', keyCallback),
-              _KeypadButton(KeypadKey.Key00, '00', keyCallback),
-              _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              _KeypadButton(
-                KeypadKey.KeyMode,
-                getModeString(),
-                keyCallback,
-                fontSize: 28,
-                fontColor: getModeColor(),
+        title: Text(S.current.view_keypad),
+        /*actions: [
+          IconButton(
+            icon: SizedBox(
+              width: 24,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Center(
+                  child: Text(
+                    getModeString(),
+                    style: TextStyle(color: getModeColor()),
+                  ),
+                ),
               ),
-              _KeypadButton(
-                KeypadKey.KeyInsert,
-                S.current.card_insert_keypad,
-                keyCallback,
-                fontSize: 28,
-                fontColor: Colors.deepOrange,
-              ),
-            ],
+            ),
+            onPressed: () => nextMode(),
+          ),
+          IconButton(
+            tooltip: S.current.card_insert_keypad,
+            icon: const Icon(Icons.credit_card),
+            onPressed: () => insertCard(),
+          ),
+        ],*/
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(
+              bottom: kBottomNavigationBarHeight + kFloatingActionButtonMargin),
+          child: AspectRatio(
+            aspectRatio: 12 / 19,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3),
+                  children: [
+                    _KeypadButton(KeypadKey.Key7, '7', keyCallback),
+                    _KeypadButton(KeypadKey.Key8, '8', keyCallback),
+                    _KeypadButton(KeypadKey.Key9, '9', keyCallback),
+                    _KeypadButton(KeypadKey.Key4, '4', keyCallback),
+                    _KeypadButton(KeypadKey.Key5, '5', keyCallback),
+                    _KeypadButton(KeypadKey.Key6, '6', keyCallback),
+                    _KeypadButton(KeypadKey.Key1, '1', keyCallback),
+                    _KeypadButton(KeypadKey.Key2, '2', keyCallback),
+                    _KeypadButton(KeypadKey.Key3, '3', keyCallback),
+                    _KeypadButton(KeypadKey.Key0, '0', keyCallback),
+                    _KeypadButton(KeypadKey.Key00, '00', keyCallback),
+                    _KeypadButton(KeypadKey.KeyBlank, '.', keyCallback),
+                  ],
+                ),
+                GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, childAspectRatio: 2 / 1),
+                  children: [
+                    _KeypadButton(
+                      KeypadKey.KeyMode,
+                      getModeString(),
+                      keyCallback,
+                      fontSize: 28,
+                      fontColor: getModeColor(),
+                    ),
+                    _KeypadButton(
+                      KeypadKey.KeyInsert,
+                      S.current.card_insert_keypad,
+                      keyCallback,
+                      fontSize: 28,
+                      fontColor: Colors.deepOrange,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: kBottomNavigationBarHeight),
-      ],
+      ),
     );
   }
 }

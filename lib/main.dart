@@ -6,29 +6,14 @@ import 'package:spicecompanion/util/util.dart';
 import 'dart:io' show Platform;
 import 'package:window_manager/window_manager.dart';
 
-// desktop platform workaround for flutter
-/*void _setTargetPlatformForDesktop() {
-  TargetPlatform targetPlatform;
-  if (Platform.isMacOS) {
-    targetPlatform = TargetPlatform.iOS;
-  } else if (Platform.isLinux || Platform.isWindows) {
-    targetPlatform = TargetPlatform.android;
-  }
-  if (targetPlatform != null) {
-    debugDefaultTargetPlatformOverride = targetPlatform;
-  }
-}*/
-
 void main() async {
-  /*try {
-    _setTargetPlatformForDesktop();
-  } catch (e) {}*/
   WidgetsFlutterBinding.ensureInitialized();
+
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(900, 600),
-      minimumSize: Size(400, 300),
+      minimumSize: Size(350, 600),
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();

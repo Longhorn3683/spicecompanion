@@ -155,6 +155,7 @@ class _ButtonsViewState extends State<ButtonsView> {
                 } else {
                   button.state = 1;
                 }
+                print(button);
                 await writeSingle(button);
                 setState(() {});
               },

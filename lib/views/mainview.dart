@@ -10,7 +10,7 @@ String _gameName = "";
 String _gameServer = "";
 Duration lastPing = const Duration(seconds: 1);
 
-bool toolbarHidden = false;
+final ValueNotifier<bool> toolbarHidden = ValueNotifier<bool>(false);
 
 enum SpiceTheme { Light, Dark, Black }
 
@@ -40,6 +40,8 @@ class MainView extends StatefulWidget {
   @override
   _MainViewState createState() => _MainViewState();
 }
+
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _MainViewState extends State<MainView> {
   SpiceView _currentView;
@@ -139,6 +141,7 @@ class _MainViewState extends State<MainView> {
         home:
             StatefulBuilder(builder: (BuildContext context, StateSetter state) {
           return Scaffold(
+            key: _scaffoldKey,
             body: SafeArea(top: false, bottom: false, child: _viewWidget),
             drawer: NavigationDrawer(
               selectedIndex: selectedIndex,
@@ -168,22 +171,12 @@ class _MainViewState extends State<MainView> {
                   icon: const Icon(Icons.credit_card),
                   label: Text(getViewName(SpiceView.CardManager)),
                 ),
-                const Divider(),
-                NavigationDrawerDestination(
-                  icon: const Icon(Icons.dialpad),
-                  label: Text(getViewName(SpiceView.Keypad)),
-                ),
                 const SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: const Icon(Icons.memory),
                   label: Text(getViewName(SpiceView.Patches)),
                 ),
                 const Divider(),
-                NavigationDrawerDestination(
-                  icon: const Icon(Icons.cast),
-                  label: Text(getViewName(SpiceView.Screen)),
-                ),
-                const SizedBox(height: 2),
                 NavigationDrawerDestination(
                   icon: const Icon(Icons.gamepad),
                   label: Text(getViewName(SpiceView.Controller)),

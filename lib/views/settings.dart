@@ -222,53 +222,6 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               const Divider(),
               getVibrationTile(),
-              ListTile(
-                title: Text(
-                    "${S.current.screen_quality}: ${Settings.screenQuality.toInt()}%"),
-                subtitle: Slider(
-                  value: Settings.screenQuality,
-                  min: 0,
-                  max: 100,
-                  divisions: 100,
-                  onChanged: (value) {
-                    //print("Settings: screen quality changed to " + value.toString());
-                    Settings.screenQuality = value;
-                    Settings.save();
-                    setState(() {});
-                  },
-                ),
-              ),
-              ListTile(
-                title: Text(
-                    "${S.current.screen_threads}: ${Settings.screenThreads.toInt()}"),
-                subtitle: Slider(
-                  value: Settings.screenThreads,
-                  min: 1,
-                  max: 10,
-                  divisions: 9,
-                  onChanged: (value) {
-                    Settings.screenThreads = value;
-                    Settings.save();
-                    setState(() {});
-                  },
-                ),
-              ),
-              ListTile(
-                title: Text(
-                    "${S.current.screen_divide}: ${Settings.screenDivide.toInt()}"),
-                subtitle: Slider(
-                  value: Settings.screenDivide,
-                  min: 1,
-                  max: 16,
-                  divisions: 15,
-                  onChanged: (value) {
-                    Settings.screenDivide = value;
-                    Settings.save();
-                    setState(() {});
-                  },
-                ),
-              ),
-              const Divider(),
               getOpenScreenshotsTile(),
               ListTile(
                 title: Text(S.current.licenses),
@@ -284,9 +237,27 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               ListTile(
                 title: Text(S.current.about),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const AboutView()),
+                onTap: () async {
+                  String about =
+                      await rootBundle.loadString('assets/about.txt');
+                  showModalBottomSheet(
+                    context: context,
+                    clipBehavior: Clip.antiAlias,
+                    builder: (context) => SingleChildScrollView(
+                      child: Column(children: [
+                        AppBar(
+                            systemOverlayStyle:
+                                getSystemUiOverlayStyle(context),
+                            automaticallyImplyLeading: false,
+                            backgroundColor: Colors.transparent,
+                            title: Text(S.current.about)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(about),
+                        ),
+                        const SizedBox(height: kBottomNavigationBarHeight + 16),
+                      ]),
+                    ),
                   );
                 },
               ),
@@ -296,50 +267,6 @@ class _SettingsViewState extends State<SettingsView> {
         const SliverPadding(
             padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight)),
       ],
-    );
-  }
-}
-
-class AboutView extends StatefulWidget {
-  const AboutView({Key key}) : super(key: key);
-
-  @override
-  _AboutViewState createState() => _AboutViewState();
-}
-
-class _AboutViewState extends State<AboutView> {
-  String content = "";
-
-  @override
-  void initState() {
-    super.initState();
-
-    // load file
-    rootBundle.loadString("assets/about.txt").then((file) {
-      content = file;
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          systemOverlayStyle: getSystemUiOverlayStyle(context),
-          title: Text(S.current.about)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Text(
-            content,
-            style: const TextStyle(fontSize: 23),
-          ),
-        ),
-      ),
     );
   }
 }

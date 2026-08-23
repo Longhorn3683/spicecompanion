@@ -55,10 +55,10 @@ class S {
     );
   }
 
-  /// `Keypad/NFC Reader`
+  /// `Keypad`
   String get view_keypad {
     return Intl.message(
-      'Keypad/NFC Reader',
+      'Keypad',
       name: 'view_keypad',
       desc: '',
       args: [],
@@ -75,10 +75,10 @@ class S {
     );
   }
 
-  /// `Screen (Beta)`
+  /// `Screen`
   String get view_screen {
     return Intl.message(
-      'Screen (Beta)',
+      'Screen',
       name: 'view_screen',
       desc: '',
       args: [],
@@ -125,10 +125,10 @@ class S {
     );
   }
 
-  /// `Server Information`
+  /// `Overview`
   String get view_info {
     return Intl.message(
-      'Server Information',
+      'Overview',
       name: 'view_info',
       desc: '',
       args: [],
@@ -275,10 +275,10 @@ class S {
     );
   }
 
-  /// `Insert Card`
+  /// `Card`
   String get card_insert_keypad {
     return Intl.message(
-      'Insert Card',
+      'Card',
       name: 'card_insert_keypad',
       desc: '',
       args: [],
@@ -505,10 +505,10 @@ class S {
     );
   }
 
-  /// `Insert your card`
+  /// `Insert card`
   String get insert_card {
     return Intl.message(
-      'Insert your card',
+      'Insert card',
       name: 'insert_card',
       desc: '',
       args: [],
@@ -590,6 +590,16 @@ class S {
     return Intl.message(
       'Screen mirror not available :(',
       name: 'no_screen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screen mirror disconnected`
+  String get screen_off {
+    return Intl.message(
+      'Screen mirror disconnected',
+      name: 'screen_off',
       desc: '',
       args: [],
     );
@@ -695,10 +705,10 @@ class S {
     );
   }
 
-  /// `Tap screen top to show top bar`
+  /// `Tap screen top to show toolbar`
   String get tap_to_show_bar {
     return Intl.message(
-      'Tap screen top to show top bar',
+      'Tap screen top to show toolbar',
       name: 'tap_to_show_bar',
       desc: '',
       args: [],
@@ -720,6 +730,46 @@ class S {
     return Intl.message(
       'Button Vibration Duration',
       name: 'button_vibration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screen Mode`
+  String get screen_mode {
+    return Intl.message(
+      'Screen Mode',
+      name: 'screen_mode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screen`
+  String get screen_mode_screen {
+    return Intl.message(
+      'Screen',
+      name: 'screen_mode_screen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `IIDX LDJ LED`
+  String get screen_mode_led {
+    return Intl.message(
+      'IIDX LDJ LED',
+      name: 'screen_mode_led',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screen Select`
+  String get screen_select {
+    return Intl.message(
+      'Screen Select',
+      name: 'screen_select',
       desc: '',
       args: [],
     );
